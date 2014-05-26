@@ -1,0 +1,37 @@
+<article>
+  <% if (item.photos && item.photos.length){ %>
+    <%- partial('post/gallery') %>
+  <% } %>
+
+    <h3><%- partial('post/title') %></h3>
+      <% if (item.layout != 'page'){ %>
+        <h6><%= item.date.format(config.date_format) %></h6>
+      <% } %>
+     <div class="row">
+          <div class="large-9 columns">
+      <% if (item.excerpt && index){ %>
+        <%- item.excerpt %>
+      <% } else { %>
+        <%- item.content %>
+      <% } %>
+    
+    <footer>
+      <% if (index){ %>
+        <% if (item.excerpt){ %>
+          <div class="alignleft">
+            <a href="<%- config.root %><%- item.path %>#more" class="more-link"><%= theme.excerpt_link %></a>
+          </div>
+        <% } %>
+        
+      <% } else { %>
+        <%- partial('post/category') %>
+        <%- partial('post/tag') %>
+        <%- partial('post/share') %>
+      <% } %>
+      <div class="clearfix"></div>
+    </footer>
+</div>
+</div>
+</article>
+
+<%- partial('comment') %>
