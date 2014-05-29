@@ -1,0 +1,21 @@
+title: 利用Acrylic DNS Proxy搭建本地dns服务器
+date: 2014-05-28 13:48:59
+tags:
+---
+##why
+许多技术网站不能打开，可以通过修改hosts文件来解决，但是域名多了，就麻烦了。  
+Acrylic DNS Proxy可以支持通配符，减少我们的工作量。  
+
+我写了一个简单的配置文件，开源地址：<https://github.com/lbp0200/AcrylicHosts>  
+利用Acrylic DNS Proxy搭建自己的dns服务。
+
+配置Acrylic DNS Proxy
+安装软件后，将AcrylicConfiguration.ini和AcrylicHosts.txt替换原来的文件即可。 将dns服务器地址改为127.0.0.1
+
+##原理
+先解析符合AcrylicHosts.txt规则中的域名 有，直接返回地址 没有，交给114.114.114.114解析。 hosts文件不支持通配符，软件Acrylic DNS Proxy可以解决通配符的问题，可以正常访问google的各项服务。
+##作用
+解决Google服务打不开的问题
+
+例如：Gmail经常被抽风，所以需要将mail.google.com域名解析为203.208.37.17  
+抱歉不能讲得太细，要低调。
