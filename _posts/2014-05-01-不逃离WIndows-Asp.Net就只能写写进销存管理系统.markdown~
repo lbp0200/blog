@@ -1,0 +1,24 @@
+---
+layout: post
+title: 不逃离WIndows，Asp.Net就只能写写进销存管理系统
+date: '2014-05-01 10:13'
+comments: true
+published: true
+keywords: 
+description: 
+excerpt: 
+categories: 
+tags: 
+---
+
+那个丹麦人把C#语言弄的再好，但是如果程序放进Windows+IIS这个容器，就有问题了。
+我在I5+8G内存的机子上测试Windows2008+IIs，直接ab 2000并发压默认的HTML主页，还加了缓存，CPU100%了，并发才1600,。
+反观我买的一个256M的小VPS，Fedora，ab 1000并发压Nginx，轻松1600+，这就是差距！
+
+京东为何抛弃Asp.Net？一切都是从技术人员搞不定秒杀开始的，秒杀的并发直接把Asp.Net秒杀，同时秒杀掉的还有我们C#程序员的饭碗。
+
+近几年中国互联网出过几次安全事故，CSDN、携程、还要那个什么酒店的开房记录，这些都是用的Windows做服务器，想到这儿，我有一种深深的恐惧，说不定哪天我就要在街边摆地摊了。
+
+![](/images/113313vo9pvv8czhsk49z4[1].jpg)
+
+##给过你机会了，是你硬不起来，只好让别人上了
