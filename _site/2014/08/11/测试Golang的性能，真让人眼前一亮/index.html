@@ -4,10 +4,10 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>About</title>
+    <title>2014-08-11测试Golang的性能，真让人眼前一亮</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="又一个github-jekyll博客">
-    <link rel="canonical" href="http://lbp0200.github.io/blog/about/">
+    <link rel="canonical" href="http://lbp0200.github.io/blog/2014/08/11/%E6%B5%8B%E8%AF%95Golang%E7%9A%84%E6%80%A7%E8%83%BD%EF%BC%8C%E7%9C%9F%E8%AE%A9%E4%BA%BA%E7%9C%BC%E5%89%8D%E4%B8%80%E4%BA%AE/">
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/blog/css/main.css">
@@ -58,15 +58,56 @@
       <div class="post">
 
   <header class="post-header">
-    <h1>About</h1>
+    <h1>2014-08-11测试Golang的性能，真让人眼前一亮</h1>
+    <p class="meta">Aug 11, 2014</p>
   </header>
 
   <article class="post-content">
-  <p>This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at <a href="http://jekyllrb.com/">jekyllrb.com</a></p>
+  <p>18000并发秒杀IIs，有木有！</p>
 
-<p>You can find the source code for the Jekyll new theme at: <a href="https://github.com/jglovier/jekyll-new">github.com/jglovier/jekyll-new</a></p>
+<p>单机测试环境Cpu:I7,ubutun </p>
 
-<p>You can find the source code for Jekyll at <a href="https://github.com/jekyll/jekyll">github.com/jekyll/jekyll</a></p>
+<p>每秒18000的处理速度，不得不让人佩服，虽然只是Hello world</p>
+
+<p>IIS的结果只有这个的1/10</p>
+
+<p>This is GoHttpBench, Version 0.1.9, https://github.com/parkghost/gohttpbench</p>
+
+<p>Author: Brandon Chen, Email: parkghost@gmail.com</p>
+
+<p>Licensed under the MIT license</p>
+
+<p>Benchmarking 127.0.0.1 (be patient)</p>
+
+<p>Finished 1000 requests</p>
+
+<p>Server Hostname:        127.0.0.1</p>
+
+<p>Server Port:            8080</p>
+
+<p>Document Path:          /go</p>
+
+<p>Document Length:        18 bytes</p>
+
+<p>Concurrency Level:      10</p>
+
+<p>Time taken for tests:   0.05 seconds</p>
+
+<p>Complete requests:      1000</p>
+
+<p>Failed requests:        0</p>
+
+<p>HTML transferred:       18000 bytes</p>
+
+<p>Requests per second:    18472.34 <a href="mean">#/sec</a></p>
+
+<p>Time per request:       0.541 <a href="mean">ms</a></p>
+
+<p>Time per request:       0.054 <a href="mean,%20across%20all%20concurrent%20requests">ms</a></p>
+
+<p>HTML Transfer rate:     314.03 [Kbytes/sec] received</p>
+
+<p>100%    7 (longest request)</p>
 
   </article>
 

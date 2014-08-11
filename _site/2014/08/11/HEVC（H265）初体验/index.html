@@ -4,10 +4,10 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>About</title>
+    <title>2014-08-11-HEVC(H.265)初体验</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="又一个github-jekyll博客">
-    <link rel="canonical" href="http://lbp0200.github.io/blog/about/">
+    <link rel="canonical" href="http://lbp0200.github.io/blog/2014/08/11/HEVC%EF%BC%88H265%EF%BC%89%E5%88%9D%E4%BD%93%E9%AA%8C/">
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/blog/css/main.css">
@@ -58,15 +58,30 @@
       <div class="post">
 
   <header class="post-header">
-    <h1>About</h1>
+    <h1>2014-08-11-HEVC(H.265)初体验</h1>
+    <p class="meta">Aug 11, 2014</p>
   </header>
 
   <article class="post-content">
-  <p>This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at <a href="http://jekyllrb.com/">jekyllrb.com</a></p>
+  <p>之前使用迅雷看看体验过，这次开始研究编解码，下面是开源项目
+http://ffmpeg.org/
+http://www.libde265.org/
+http://www.videolan.org/developers/x265.html
+第2个开源项目提供样片，下载了1个10分钟的动画片，2个版本，分别是1080P和720P的
+分别使用ffplay和vlc播放，播放器播放效果基本相同，但是不同分辨率差异很大。
+我的电脑是09年的AMD四核，播放时CPU基本满载。
+播放1080P，卡顿十分严重，CPU80%，无法观看
+播放720P，能够流畅播放，比264效果好，CPU60%，能够观看</p>
 
-<p>You can find the source code for the Jekyll new theme at: <a href="https://github.com/jglovier/jekyll-new">github.com/jglovier/jekyll-new</a></p>
+<p>http://www.free-codecs.com/download/x265GUI.htm</p>
 
-<p>You can find the source code for Jekyll at <a href="https://github.com/jekyll/jekyll">github.com/jekyll/jekyll</a></p>
+<p>http://ifme.sourceforge.net/</p>
+
+<p>ffmpeg -i 01.avi -c:v rawvideo -pix_fmt yuv420p 01.yuv</p>
+
+<p>x265 --input-res 720x480 --fps 24000/100 01.yuv -o 01.h265</p>
+
+<p>../program/ffmpeg/ffmpeg -i 01.avi -c:v libx265 -c:a copy 01.mp4</p>
 
   </article>
 

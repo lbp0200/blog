@@ -4,10 +4,10 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>About</title>
+    <title>2014-08-11测试Golang的性能，真让人眼前一亮</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="又一个github-jekyll博客">
-    <link rel="canonical" href="http://lbp0200.github.io/blog/about/">
+    <link rel="canonical" href="http://lbp0200.github.io/blog/:">
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/blog/css/main.css">
@@ -58,15 +58,56 @@
       <div class="post">
 
   <header class="post-header">
-    <h1>About</h1>
+    <h1>2014-08-11测试Golang的性能，真让人眼前一亮</h1>
+    <p class="meta">Aug 11, 2014</p>
   </header>
 
   <article class="post-content">
-  <p>This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at <a href="http://jekyllrb.com/">jekyllrb.com</a></p>
+  18000并发秒杀IIs，有木有！
 
-<p>You can find the source code for the Jekyll new theme at: <a href="https://github.com/jglovier/jekyll-new">github.com/jglovier/jekyll-new</a></p>
+单机测试环境Cpu:I7,ubutun 
 
-<p>You can find the source code for Jekyll at <a href="https://github.com/jekyll/jekyll">github.com/jekyll/jekyll</a></p>
+每秒18000的处理速度，不得不让人佩服，虽然只是Hello world
+
+IIS的结果只有这个的1/10
+
+This is GoHttpBench, Version 0.1.9, https://github.com/parkghost/gohttpbench
+
+Author: Brandon Chen, Email: parkghost@gmail.com
+
+Licensed under the MIT license
+
+Benchmarking 127.0.0.1 (be patient)
+
+Finished 1000 requests
+
+Server Hostname:        127.0.0.1
+
+Server Port:            8080
+
+Document Path:          /go
+
+Document Length:        18 bytes
+
+Concurrency Level:      10
+
+Time taken for tests:   0.05 seconds
+
+Complete requests:      1000
+
+Failed requests:        0
+
+HTML transferred:       18000 bytes
+
+Requests per second:    18472.34 [#/sec] (mean)
+
+Time per request:       0.541 [ms] (mean)
+
+Time per request:       0.054 [ms] (mean, across all concurrent requests)
+
+HTML Transfer rate:     314.03 [Kbytes/sec] received
+
+ 100%	 7 (longest request)
 
   </article>
 
