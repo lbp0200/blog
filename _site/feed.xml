@@ -5,12 +5,12 @@
     <description>又一个github-jekyll博客</description>
     <link>http://lbp0200.github.io/blog/</link>
     <atom:link href="http://lbp0200.github.io/blog/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 11 Aug 2014 09:06:56 -0700</pubDate>
-    <lastBuildDate>Mon, 11 Aug 2014 09:06:56 -0700</lastBuildDate>
+    <pubDate>Mon, 11 Aug 2014 09:12:10 -0700</pubDate>
+    <lastBuildDate>Mon, 11 Aug 2014 09:12:10 -0700</lastBuildDate>
     <generator>Jekyll v2.1.1</generator>
     
       <item>
-        <title>2014-08-11测试Golang的性能，真让人眼前一亮</title>
+        <title>测试Golang的性能，真让人眼前一亮</title>
         <description>&lt;p&gt;18000并发秒杀IIs，有木有！&lt;/p&gt;
 
 &lt;p&gt;单机测试环境Cpu:I7,ubutun &lt;/p&gt;
@@ -65,7 +65,7 @@
       </item>
     
       <item>
-        <title>2014-08-11-HEVC(H.265)初体验</title>
+        <title>HEVC(H.265)初体验</title>
         <description>&lt;p&gt;之前使用迅雷看看体验过，这次开始研究编解码，下面是开源项目
 http://ffmpeg.org/
 http://www.libde265.org/
