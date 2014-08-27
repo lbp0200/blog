@@ -4,10 +4,10 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Chrome开发人员工具的使用</title>
+    <title>牛顿法求平方根</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="又一个github-jekyll博客">
-    <link rel="canonical" href="http://lbp.im/blog/blog/2014/04/29/Chrome%E5%BC%80%E5%8F%91%E4%BA%BA%E5%91%98%E5%B7%A5%E5%85%B7%E7%9A%84%E4%BD%BF%E7%94%A8/">
+    <link rel="canonical" href="http://lbp.im/blog/blog/2014/08/22/golang%E5%AE%9E%E7%8E%B0%E7%89%9B%E9%A1%BF%E6%B3%95%E6%B1%82%E5%B9%B3%E6%96%B9%E6%A0%B9/">
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/blog/css/main.css">
@@ -56,24 +56,38 @@
       <div class="post">
 
   <header class="post-header">
-    <h1>Chrome开发人员工具的使用</h1>
-    <p class="meta">Apr 29, 2014</p>
+    <h1>牛顿法求平方根</h1>
+    <p class="meta">Aug 22, 2014</p>
   </header>
 
   <article class="post-content">
-  <p>Chrome开发人员工具确实是神器，可以动态地修改网页在浏览器中呈现地样式。</p>
+  <p><a href="http://tour.golang.org/#25" title="牛顿法求平方根">http://tour.golang.org/#25</a></p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">package main
 
-<p>之前没有仔细地研究过，最近又学习到了一些新的功能使用方法，下面都以Chrome34版为例。</p>
+import (
+    &quot;fmt&quot;
+)
 
-<p>例如，网页301或者302跳转，浏览器请求的log就被更新了，不知道当前网页是如何跳转来的，下面介绍类似于Fildder的网页log。</p>
+func Sqrt(x float64) float64 {
+    var z float64 = 1.5
+    for i := 0; i &lt; 3; i++ {
+        z = z - (z*z-x)/2.0/z
+        fmt.Println(z)
+    }
+    return z
+}
 
-<p>勾选Network下的Preserve log，就能达到效果了</p>
+func main() {
+    fmt.Println(Sqrt(2))
+}
+</code></pre></div>
+<p>1.4166666666666667</p>
 
-<p><img src="/images/20140429231440.jpg" alt="Alt text">  </p>
+<p>1.4142156862745099</p>
 
-<p>Chrome还支持多种事件监听，如网页被js修改。在Elements下，鼠标右键需要监听的Dom，Break On，属性被修改、Dom被修改、节点被删除。</p>
+<p>1.4142135623746899</p>
 
-<p>在Sources下右侧还要更多的事件，XHR BreakPoints是监听AJAX的请求；Event Listener BreakPoints是监听整个网页的事件，如load、click鼠标点击等等……</p>
+<p>1.4142135623746899</p>
 
   </article>
 

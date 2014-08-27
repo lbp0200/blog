@@ -3,11 +3,94 @@
   <channel>
     <title>丑矬穷</title>
     <description>又一个github-jekyll博客</description>
-    <link>http://lbp0200.github.io/blog/</link>
-    <atom:link href="http://lbp0200.github.io/blog/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 11 Aug 2014 09:12:10 -0700</pubDate>
-    <lastBuildDate>Mon, 11 Aug 2014 09:12:10 -0700</lastBuildDate>
-    <generator>Jekyll v2.1.1</generator>
+    <link>http://lbp.im/blog/blog/</link>
+    <atom:link href="http://lbp.im/blog/blog/feed.xml" rel="self" type="application/rss+xml" />
+    <pubDate>Wed, 27 Aug 2014 07:08:39 -0700</pubDate>
+    <lastBuildDate>Wed, 27 Aug 2014 07:08:39 -0700</lastBuildDate>
+    <generator>Jekyll v2.2.0</generator>
+    
+      <item>
+        <title>抛弃IIS，利用FastCGI让Asp.net与Nginx在一起</title>
+        <description>&lt;ol&gt;
+&lt;li&gt;用virtualbox建Linux虚拟机，桥接网卡，让Linux和Windows在一个局域网内。&lt;/li&gt;
+&lt;li&gt;Linux上安装Nginx，Nginx新建一个网站，域名随便（在hosts文件中把域名指向127.0.0.1即可），关键配置如下：&lt;br&gt;
+server&lt;em&gt;name  fcgitest.com;&lt;br&gt;
+location / {&lt;br&gt;
+    fastcgi&lt;/em&gt;pass   10.0.30.222:9000;#Windows上.Net的FastCGI端口&lt;br&gt;
+    include        fastcgi_params;&lt;br&gt;
+}&lt;/li&gt;
+&lt;li&gt;Windows上，下载&lt;a href=&quot;https://github.com/wmeyer/SharpCGI/downloads&quot; title=&quot;SharpCGI-0.2-Precompiled.zip&quot;&gt;https://github.com/wmeyer/SharpCGI/downloads&lt;/a&gt;，为了简单，直接打开里面的FastCGIAppCSharp项目，监听Ip改为0.0.0.0。&lt;/li&gt;
+&lt;li&gt;Windows上，在hosts文件中把域名指向Linux的Ip，在浏览器中打开域名，应该可以看到正确的结果了。&lt;/li&gt;
+&lt;li&gt;下面再用ab做个压力测试&lt;br&gt;
+sudo apt-get install apache2-utils&lt;br&gt;
+ab -c 100 -n 9000 http://fcgitest.com/&lt;br&gt;
+&amp;gt; Requests per second:    1742.95 &lt;a href=&quot;mean&quot;&gt;#/sec&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;小结：Linux和Nginx未做如何调优，Nginx默认主页并发是4000多左右，这个结果勉强还可以，毕竟抛弃了笨重的IIS。下一步可以做更多的测试及调优，毕竟这样操作还需要把MVC框架整合进来，如果没有明显的性能提升，谁也不想这么折腾。Mono也提供了FastCGI服务器，但是Mono的坑太多，折腾不起。事情到了这，我不禁想要是Delphi也实现了FastCGI，还不如用Delphi呢，能给一个.NET活下去的理由么？貌似也只剩下快速开发这一项了，对，.NET施展最多的领域小型企业应用，这种不怎么赚钱的项目，老板怎么肯花钱？.Net开发人员的工资也必然比较低。&lt;/p&gt;
+
+&lt;p&gt;下面再做一个.NET服务器集群&lt;br&gt;
+修改Nginx的域名配置文件，关键部分&lt;br&gt;
+    upstream fastcgi {&lt;br&gt;
+        server 10.0.30.222:9000;&lt;br&gt;
+        server 10.0.30.223:9000 ;&lt;br&gt;
+    }&lt;br&gt;
+    server&lt;em&gt;name  fcgitest.com;&lt;br&gt;
+    location / {&lt;br&gt;
+        fastcgi&lt;/em&gt;pass   fastcgi;&lt;br&gt;
+        include        fastcgi_params;&lt;br&gt;
+    }&lt;br&gt;
+再次进行压力测试，结果：  &lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Requests per second:2567.90 &lt;a href=&quot;mean&quot;&gt;#/sec&lt;/a&gt;  &lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;strong&gt;并发提高了一倍&lt;/strong&gt;。这里可能有人会问Session的问题，Windows上有自带的Session服务，可以独立一台服务器用来存放Session。&lt;/p&gt;
+</description>
+        <pubDate>Wed, 27 Aug 2014 00:00:00 -0700</pubDate>
+        <link>http://lbp.im/blog/blog/2014/08/27/%E6%8A%9B%E5%BC%83IIS%EF%BC%8C%E5%88%A9%E7%94%A8FastCGI%E8%AE%A9Asp.net%E4%B8%8ENginx%E5%9C%A8%E4%B8%80%E8%B5%B7/</link>
+        <guid isPermaLink="true">http://lbp.im/blog/blog/2014/08/27/%E6%8A%9B%E5%BC%83IIS%EF%BC%8C%E5%88%A9%E7%94%A8FastCGI%E8%AE%A9Asp.net%E4%B8%8ENginx%E5%9C%A8%E4%B8%80%E8%B5%B7/</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>牛顿法求平方根</title>
+        <description>&lt;p&gt;&lt;a href=&quot;http://tour.golang.org/#25&quot; title=&quot;牛顿法求平方根&quot;&gt;http://tour.golang.org/#25&lt;/a&gt;&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;package main
+
+import (
+    &amp;quot;fmt&amp;quot;
+)
+
+func Sqrt(x float64) float64 {
+    var z float64 = 1.5
+    for i := 0; i &amp;lt; 3; i++ {
+        z = z - (z*z-x)/2.0/z
+        fmt.Println(z)
+    }
+    return z
+}
+
+func main() {
+    fmt.Println(Sqrt(2))
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;1.4166666666666667&lt;/p&gt;
+
+&lt;p&gt;1.4142156862745099&lt;/p&gt;
+
+&lt;p&gt;1.4142135623746899&lt;/p&gt;
+
+&lt;p&gt;1.4142135623746899&lt;/p&gt;
+</description>
+        <pubDate>Fri, 22 Aug 2014 00:00:00 -0700</pubDate>
+        <link>http://lbp.im/blog/blog/2014/08/22/golang%E5%AE%9E%E7%8E%B0%E7%89%9B%E9%A1%BF%E6%B3%95%E6%B1%82%E5%B9%B3%E6%96%B9%E6%A0%B9/</link>
+        <guid isPermaLink="true">http://lbp.im/blog/blog/2014/08/22/golang%E5%AE%9E%E7%8E%B0%E7%89%9B%E9%A1%BF%E6%B3%95%E6%B1%82%E5%B9%B3%E6%96%B9%E6%A0%B9/</guid>
+        
+        
+      </item>
     
       <item>
         <title>测试Golang的性能，真让人眼前一亮</title>
@@ -58,8 +141,8 @@
 &lt;p&gt;100%    7 (longest request)&lt;/p&gt;
 </description>
         <pubDate>Mon, 11 Aug 2014 16:59:33 -0700</pubDate>
-        <link>http://lbp0200.github.io/blog/2014/08/11/%E6%B5%8B%E8%AF%95Golang%E7%9A%84%E6%80%A7%E8%83%BD%EF%BC%8C%E7%9C%9F%E8%AE%A9%E4%BA%BA%E7%9C%BC%E5%89%8D%E4%B8%80%E4%BA%AE/</link>
-        <guid isPermaLink="true">http://lbp0200.github.io/blog/2014/08/11/%E6%B5%8B%E8%AF%95Golang%E7%9A%84%E6%80%A7%E8%83%BD%EF%BC%8C%E7%9C%9F%E8%AE%A9%E4%BA%BA%E7%9C%BC%E5%89%8D%E4%B8%80%E4%BA%AE/</guid>
+        <link>http://lbp.im/blog/blog/2014/08/11/%E6%B5%8B%E8%AF%95Golang%E7%9A%84%E6%80%A7%E8%83%BD%EF%BC%8C%E7%9C%9F%E8%AE%A9%E4%BA%BA%E7%9C%BC%E5%89%8D%E4%B8%80%E4%BA%AE/</link>
+        <guid isPermaLink="true">http://lbp.im/blog/blog/2014/08/11/%E6%B5%8B%E8%AF%95Golang%E7%9A%84%E6%80%A7%E8%83%BD%EF%BC%8C%E7%9C%9F%E8%AE%A9%E4%BA%BA%E7%9C%BC%E5%89%8D%E4%B8%80%E4%BA%AE/</guid>
         
         
       </item>
@@ -87,8 +170,8 @@ http://www.videolan.org/developers/x265.html
 &lt;p&gt;../program/ffmpeg/ffmpeg -i 01.avi -c:v libx265 -c:a copy 01.mp4&lt;/p&gt;
 </description>
         <pubDate>Mon, 11 Aug 2014 16:59:33 -0700</pubDate>
-        <link>http://lbp0200.github.io/blog/2014/08/11/HEVC%EF%BC%88H265%EF%BC%89%E5%88%9D%E4%BD%93%E9%AA%8C/</link>
-        <guid isPermaLink="true">http://lbp0200.github.io/blog/2014/08/11/HEVC%EF%BC%88H265%EF%BC%89%E5%88%9D%E4%BD%93%E9%AA%8C/</guid>
+        <link>http://lbp.im/blog/blog/2014/08/11/HEVC%EF%BC%88H265%EF%BC%89%E5%88%9D%E4%BD%93%E9%AA%8C/</link>
+        <guid isPermaLink="true">http://lbp.im/blog/blog/2014/08/11/HEVC%EF%BC%88H265%EF%BC%89%E5%88%9D%E4%BD%93%E9%AA%8C/</guid>
         
         
       </item>
@@ -106,8 +189,8 @@ http://www.videolan.org/developers/x265.html
 &lt;p&gt;换个公司吧，最起码是个识货的公司。&lt;/p&gt;
 </description>
         <pubDate>Mon, 11 Aug 2014 16:10:41 -0700</pubDate>
-        <link>http://lbp0200.github.io/blog/2014/08/11/%E4%B8%8D%E8%AF%86%E8%B4%A7%E7%9A%84%E5%85%AC%E5%8F%B8%EF%BC%8C%E8%BF%98%E6%98%AF%E7%A6%BB%E5%BC%80%E4%B8%BA%E5%A5%BD/</link>
-        <guid isPermaLink="true">http://lbp0200.github.io/blog/2014/08/11/%E4%B8%8D%E8%AF%86%E8%B4%A7%E7%9A%84%E5%85%AC%E5%8F%B8%EF%BC%8C%E8%BF%98%E6%98%AF%E7%A6%BB%E5%BC%80%E4%B8%BA%E5%A5%BD/</guid>
+        <link>http://lbp.im/blog/blog/2014/08/11/%E4%B8%8D%E8%AF%86%E8%B4%A7%E7%9A%84%E5%85%AC%E5%8F%B8%EF%BC%8C%E8%BF%98%E6%98%AF%E7%A6%BB%E5%BC%80%E4%B8%BA%E5%A5%BD/</link>
+        <guid isPermaLink="true">http://lbp.im/blog/blog/2014/08/11/%E4%B8%8D%E8%AF%86%E8%B4%A7%E7%9A%84%E5%85%AC%E5%8F%B8%EF%BC%8C%E8%BF%98%E6%98%AF%E7%A6%BB%E5%BC%80%E4%B8%BA%E5%A5%BD/</guid>
         
         
       </item>
@@ -139,8 +222,8 @@ http://www.videolan.org/developers/x265.html
 &lt;/ul&gt;
 </description>
         <pubDate>Wed, 04 Jun 2014 15:00:05 -0700</pubDate>
-        <link>http://lbp0200.github.io/blog/2014/06/04/%E8%AF%A6%E8%A7%A3%E7%94%B5%E8%84%91%E3%80%81%E6%99%BA%E8%83%BD%E5%92%8C%E4%BA%91%E5%88%B0%E5%BA%95%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F/</link>
-        <guid isPermaLink="true">http://lbp0200.github.io/blog/2014/06/04/%E8%AF%A6%E8%A7%A3%E7%94%B5%E8%84%91%E3%80%81%E6%99%BA%E8%83%BD%E5%92%8C%E4%BA%91%E5%88%B0%E5%BA%95%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F/</guid>
+        <link>http://lbp.im/blog/blog/2014/06/04/%E8%AF%A6%E8%A7%A3%E7%94%B5%E8%84%91%E3%80%81%E6%99%BA%E8%83%BD%E5%92%8C%E4%BA%91%E5%88%B0%E5%BA%95%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F/</link>
+        <guid isPermaLink="true">http://lbp.im/blog/blog/2014/06/04/%E8%AF%A6%E8%A7%A3%E7%94%B5%E8%84%91%E3%80%81%E6%99%BA%E8%83%BD%E5%92%8C%E4%BA%91%E5%88%B0%E5%BA%95%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F/</guid>
         
         
       </item>
@@ -159,8 +242,8 @@ http://www.videolan.org/developers/x265.html
 &lt;/ul&gt;
 </description>
         <pubDate>Wed, 04 Jun 2014 14:59:33 -0700</pubDate>
-        <link>http://lbp0200.github.io/blog/2014/06/04/%E5%B7%A5%E4%BD%9C%E7%AC%94%E8%AE%B0/</link>
-        <guid isPermaLink="true">http://lbp0200.github.io/blog/2014/06/04/%E5%B7%A5%E4%BD%9C%E7%AC%94%E8%AE%B0/</guid>
+        <link>http://lbp.im/blog/blog/2014/06/04/%E5%B7%A5%E4%BD%9C%E7%AC%94%E8%AE%B0/</link>
+        <guid isPermaLink="true">http://lbp.im/blog/blog/2014/06/04/%E5%B7%A5%E4%BD%9C%E7%AC%94%E8%AE%B0/</guid>
         
         
       </item>
@@ -457,8 +540,8 @@ http://www.videolan.org/developers/x265.html
       &amp;lt;/configuration&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
         <pubDate>Wed, 04 Jun 2014 14:59:33 -0700</pubDate>
-        <link>http://lbp0200.github.io/blog/2014/06/04/Mono%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E8%BF%90%E8%A1%8CBlogEngine.Net%E7%AC%94%E8%AE%B0/</link>
-        <guid isPermaLink="true">http://lbp0200.github.io/blog/2014/06/04/Mono%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E8%BF%90%E8%A1%8CBlogEngine.Net%E7%AC%94%E8%AE%B0/</guid>
+        <link>http://lbp.im/blog/blog/2014/06/04/Mono%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E8%BF%90%E8%A1%8CBlogEngine.Net%E7%AC%94%E8%AE%B0/</link>
+        <guid isPermaLink="true">http://lbp.im/blog/blog/2014/06/04/Mono%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E8%BF%90%E8%A1%8CBlogEngine.Net%E7%AC%94%E8%AE%B0/</guid>
         
         
       </item>
@@ -471,8 +554,8 @@ http://www.videolan.org/developers/x265.html
 窃以为，文档应该是分为入门、进阶和高级3个阶段，这样才能解决不同人不同的需求，Echarts解决了入门和初步进阶，高级部分基本是真空。&lt;/p&gt;
 </description>
         <pubDate>Thu, 29 May 2014 14:49:08 -0700</pubDate>
-        <link>http://lbp0200.github.io/blog/2014/05/29/echarts%E4%BD%BF%E7%94%A8%E5%BF%83%E5%BE%97/</link>
-        <guid isPermaLink="true">http://lbp0200.github.io/blog/2014/05/29/echarts%E4%BD%BF%E7%94%A8%E5%BF%83%E5%BE%97/</guid>
+        <link>http://lbp.im/blog/blog/2014/05/29/echarts%E4%BD%BF%E7%94%A8%E5%BF%83%E5%BE%97/</link>
+        <guid isPermaLink="true">http://lbp.im/blog/blog/2014/05/29/echarts%E4%BD%BF%E7%94%A8%E5%BF%83%E5%BE%97/</guid>
         
         
       </item>
@@ -546,65 +629,8 @@ http://www.videolan.org/developers/x265.html
 &lt;/code&gt;&lt;/p&gt;
 </description>
         <pubDate>Wed, 28 May 2014 06:53:41 -0700</pubDate>
-        <link>http://lbp0200.github.io/blog/2014/05/28/c%E5%B9%B6%E8%A1%8C%E7%BC%96%E7%A8%8B%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E9%97%B4%E9%80%9A%E8%BF%87%E9%98%9F%E5%88%97%E8%BF%9B%E8%A1%8C%E9%80%9A%E8%AE%AF/</link>
-        <guid isPermaLink="true">http://lbp0200.github.io/blog/2014/05/28/c%E5%B9%B6%E8%A1%8C%E7%BC%96%E7%A8%8B%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E9%97%B4%E9%80%9A%E8%BF%87%E9%98%9F%E5%88%97%E8%BF%9B%E8%A1%8C%E9%80%9A%E8%AE%AF/</guid>
-        
-        
-      </item>
-    
-      <item>
-        <title>单台服务器Asp.Net的并发理论上限是多少？</title>
-        <description>&lt;p&gt;因为无论你的代码有多好，网站的并发都不可能超过此上限，所以这是非常有意义的。&lt;/p&gt;
-
-&lt;p&gt;忽略硬件,开始从软件方面分析.&lt;/p&gt;
-
-&lt;p&gt;Asp.Net的性能首先取决于操作系统,某些windows版本会限制内存\网络连接数,代码再好,并发也上不去.&lt;/p&gt;
-
-&lt;p&gt;其次是IIS,我近期在一台i5\8G内存的电脑上测试IIS性能,压IIs默认的html首页，.html加缓存，只有1600左右的并发，性能太差了。&lt;br&gt;
-参考了一些资料，单台Windows服务器的并发是3000-5000&lt;br&gt;
-还是盖茨的那句名言&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;用户需要那么多的并发(⊙_⊙)？&lt;/p&gt;
-&lt;/blockquote&gt;
-</description>
-        <pubDate>Wed, 28 May 2014 06:53:24 -0700</pubDate>
-        <link>http://lbp0200.github.io/blog/2014/05/28/%E5%8D%95%E5%8F%B0%E6%9C%8D%E5%8A%A1%E5%99%A8aspnet%E7%9A%84%E5%B9%B6%E5%8F%91%E7%90%86%E8%AE%BA%E4%B8%8A%E9%99%90%E6%98%AF%E5%A4%9A%E5%B0%91%EF%BC%9F/</link>
-        <guid isPermaLink="true">http://lbp0200.github.io/blog/2014/05/28/%E5%8D%95%E5%8F%B0%E6%9C%8D%E5%8A%A1%E5%99%A8aspnet%E7%9A%84%E5%B9%B6%E5%8F%91%E7%90%86%E8%AE%BA%E4%B8%8A%E9%99%90%E6%98%AF%E5%A4%9A%E5%B0%91%EF%BC%9F/</guid>
-        
-        
-      </item>
-    
-      <item>
-        <title>SqlServer安装活动合成模板(ATL)检查错误及启动14001错误的解决办法</title>
-        <description>&lt;p&gt;&lt;a href=&quot;http://blog.amastaneh.com/2012/11/fusion-active-template-library-atl.html&quot;&gt;http://blog.amastaneh.com/2012/11/fusion-active-template-library-atl.html&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;SOLUTION:&lt;/strong&gt;&lt;br&gt;
-Go to setup media (SQL DVD) and install this package and it&amp;#39;ll be solved after a restart ;-)
-解决办法进入安装盘，安装下面的程序，然后重启。&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;英文版&lt;/strong&gt;&lt;br&gt;
-32bit: DVD\1033&lt;em&gt;ENU&lt;/em&gt;LP\x86\Setup\sqlsupport&lt;em&gt;msi\sqlsupport.msi&lt;br&gt;
-64bit: DVD\1033&lt;/em&gt;ENU&lt;em&gt;LP\x64\Setup\sqlsupport&lt;/em&gt;msi\sqlsupport.msi&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;中文版&lt;/strong&gt;&lt;br&gt;
-32bit: DVD\2052&lt;em&gt;CHS&lt;/em&gt;LP\x86\Setup\sqlsupport&lt;em&gt;msi\sqlsupport.msi&lt;br&gt;
-64bit: DVD\2052&lt;/em&gt;CHS&lt;em&gt;LP\x64\Setup\sqlsupport&lt;/em&gt;msi\sqlsupport.msi&lt;/p&gt;
-
-&lt;p&gt;再一次领教了微软技术的牛×，下面的两篇博文更是让我确信微软自己就在制造Dll地狱
-&lt;a href=&quot;http://www.cnblogs.com/mixiyou/archive/2009/10/02/1575311.html&quot;&gt;http://www.cnblogs.com/mixiyou/archive/2009/10/02/1575311.html&lt;/a&gt;
-&lt;a href=&quot;http://blog.csdn.net/qq18052887/article/details/4846893&quot;&gt;http://blog.csdn.net/qq18052887/article/details/4846893&lt;/a&gt;&lt;br&gt;
-解决办法
-&lt;a href=&quot;http://www.cnblogs.com/mixiyou/archive/2010/02/09/1663620.html&quot;&gt;http://www.cnblogs.com/mixiyou/archive/2010/02/09/1663620.html&lt;/a&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;看来我需要更换SqlServer的安装包了，下载个最新的免费版好了，这货对付着用吧
-最后，.net 2.0都不能用了，只好可耻地重新做系统了&lt;/p&gt;
-&lt;/blockquote&gt;
-</description>
-        <pubDate>Wed, 28 May 2014 06:53:03 -0700</pubDate>
-        <link>http://lbp0200.github.io/blog/2014/05/28/sqlserver%E5%AE%89%E8%A3%85%E6%B4%BB%E5%8A%A8%E5%90%88%E6%88%90%E6%A8%A1%E6%9D%BF(atl)%E6%A3%80%E6%9F%A5%E9%94%99%E8%AF%AF%E5%8F%8A%E5%90%AF%E5%8A%A814001%E9%94%99%E8%AF%AF%E7%9A%84%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95/</link>
-        <guid isPermaLink="true">http://lbp0200.github.io/blog/2014/05/28/sqlserver%E5%AE%89%E8%A3%85%E6%B4%BB%E5%8A%A8%E5%90%88%E6%88%90%E6%A8%A1%E6%9D%BF(atl)%E6%A3%80%E6%9F%A5%E9%94%99%E8%AF%AF%E5%8F%8A%E5%90%AF%E5%8A%A814001%E9%94%99%E8%AF%AF%E7%9A%84%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95/</guid>
+        <link>http://lbp.im/blog/blog/2014/05/28/c%E5%B9%B6%E8%A1%8C%E7%BC%96%E7%A8%8B%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E9%97%B4%E9%80%9A%E8%BF%87%E9%98%9F%E5%88%97%E8%BF%9B%E8%A1%8C%E9%80%9A%E8%AE%AF/</link>
+        <guid isPermaLink="true">http://lbp.im/blog/blog/2014/05/28/c%E5%B9%B6%E8%A1%8C%E7%BC%96%E7%A8%8B%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E9%97%B4%E9%80%9A%E8%BF%87%E9%98%9F%E5%88%97%E8%BF%9B%E8%A1%8C%E9%80%9A%E8%AE%AF/</guid>
         
         
       </item>
