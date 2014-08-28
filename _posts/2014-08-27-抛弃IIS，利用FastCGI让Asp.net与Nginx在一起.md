@@ -33,4 +33,9 @@ title: 抛弃IIS，利用FastCGI让Asp.net与Nginx在一起
 再次进行压力测试，结果：  
 > Requests per second:2567.90 [#/sec] (mean)  
 
-**并发提高了一倍**。这里可能有人会问Session的问题，Windows上有自带的Session服务，可以独立一台服务器用来存放Session。
+**并发提高了一倍**。这里可能有人会问Session的问题，Windows上有自带的Session服务，可以独立一台服务器用来存放Session。  
+顺手**测试了一下PHP的性能**，同样的压力，基本把Nginx跑满了。  
+> Requests per second:    3784.35 [#/sec] (mean)  
+
+直接压IIS，返回Hello  
+> Requests per second:    2213.49 [#/sec] (mean)
