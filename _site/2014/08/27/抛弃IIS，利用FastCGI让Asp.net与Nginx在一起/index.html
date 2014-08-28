@@ -4,10 +4,10 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Chrome开发人员工具的使用</title>
+    <title>抛弃IIS，利用FastCGI让Asp.net与Nginx在一起</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="又一个github-jekyll博客">
-    <link rel="canonical" href="http://lbp.im/blog/blog/2014/04/29/Chrome%E5%BC%80%E5%8F%91%E4%BA%BA%E5%91%98%E5%B7%A5%E5%85%B7%E7%9A%84%E4%BD%BF%E7%94%A8/">
+    <link rel="canonical" href="http://lbp.im/blog/blog/2014/08/27/%E6%8A%9B%E5%BC%83IIS%EF%BC%8C%E5%88%A9%E7%94%A8FastCGI%E8%AE%A9Asp.net%E4%B8%8ENginx%E5%9C%A8%E4%B8%80%E8%B5%B7/">
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/blog/css/main.css">
@@ -56,24 +56,47 @@
       <div class="post">
 
   <header class="post-header">
-    <h1>Chrome开发人员工具的使用</h1>
-    <p class="meta">Apr 29, 2014</p>
+    <h1>抛弃IIS，利用FastCGI让Asp.net与Nginx在一起</h1>
+    <p class="meta">Aug 27, 2014</p>
   </header>
 
   <article class="post-content">
-  <p>Chrome开发人员工具确实是神器，可以动态地修改网页在浏览器中呈现地样式。</p>
+  <ol>
+<li>用virtualbox建Linux虚拟机，桥接网卡，让Linux和Windows在一个局域网内。</li>
+<li>Linux上安装Nginx，Nginx新建一个网站，域名随便（在hosts文件中把域名指向127.0.0.1即可），关键配置如下：<br>
+server<em>name  fcgitest.com;<br>
+location / {<br>
+    fastcgi</em>pass   10.0.30.222:9000;#Windows上.Net的FastCGI端口<br>
+    include        fastcgi_params;<br>
+}</li>
+<li>Windows上，下载<a href="https://github.com/wmeyer/SharpCGI/downloads" title="SharpCGI-0.2-Precompiled.zip">https://github.com/wmeyer/SharpCGI/downloads</a>，为了简单，直接打开里面的FastCGIAppCSharp项目，监听Ip改为0.0.0.0。</li>
+<li>Windows上，在hosts文件中把域名指向Linux的Ip，在浏览器中打开域名，应该可以看到正确的结果了。</li>
+<li>下面再用ab做个压力测试<br>
+sudo apt-get install apache2-utils<br>
+ab -c 100 -n 9000 http://fcgitest.com/<br>
+&gt; Requests per second:    1742.95 <a href="mean">#/sec</a></li>
+</ol>
 
-<p>之前没有仔细地研究过，最近又学习到了一些新的功能使用方法，下面都以Chrome34版为例。</p>
+<p>小结：Linux和Nginx未做如何调优，Nginx默认主页并发是4000多左右，这个结果勉强还可以，毕竟抛弃了笨重的IIS。下一步可以做更多的测试及调优，毕竟这样操作还需要把MVC框架整合进来，如果没有明显的性能提升，谁也不想这么折腾。Mono也提供了FastCGI服务器，但是Mono的坑太多，折腾不起。事情到了这，我不禁想要是Delphi也实现了FastCGI，还不如用Delphi呢，能给一个.NET活下去的理由么？貌似也只剩下快速开发这一项了，对，.NET施展最多的领域小型企业应用，这种不怎么赚钱的项目，老板怎么肯花钱？.Net开发人员的工资也必然比较低。</p>
 
-<p>例如，网页301或者302跳转，浏览器请求的log就被更新了，不知道当前网页是如何跳转来的，下面介绍类似于Fildder的网页log。</p>
+<p>下面再做一个.NET服务器集群<br>
+修改Nginx的域名配置文件，关键部分<br>
+    upstream fastcgi {<br>
+        server 10.0.30.222:9000;<br>
+        server 10.0.30.223:9000 ;<br>
+    }<br>
+    server<em>name  fcgitest.com;<br>
+    location / {<br>
+        fastcgi</em>pass   fastcgi;<br>
+        include        fastcgi_params;<br>
+    }<br>
+再次进行压力测试，结果：  </p>
 
-<p>勾选Network下的Preserve log，就能达到效果了</p>
+<blockquote>
+<p>Requests per second:2567.90 <a href="mean">#/sec</a>  </p>
+</blockquote>
 
-<p><img src="/images/20140429231440.jpg" alt="Alt text">  </p>
-
-<p>Chrome还支持多种事件监听，如网页被js修改。在Elements下，鼠标右键需要监听的Dom，Break On，属性被修改、Dom被修改、节点被删除。</p>
-
-<p>在Sources下右侧还要更多的事件，XHR BreakPoints是监听AJAX的请求；Event Listener BreakPoints是监听整个网页的事件，如load、click鼠标点击等等……</p>
+<p><strong>并发提高了一倍</strong>。这里可能有人会问Session的问题，Windows上有自带的Session服务，可以独立一台服务器用来存放Session。</p>
 
   </article>
 

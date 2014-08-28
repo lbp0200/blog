@@ -3,10 +3,14 @@ title: 丑矬穷
 email: lbp0408@gmail.com
 description: "又一个github-jekyll博客"
 baseurl: "/blog"
-url: "http://lbp0200.github.io"
+url: "http://lbp.im/blog"
 twitter_username: 
 github_username:  lbp0200
 
+paginate: 20
 # Build settings
 markdown: redcarpet
 permalink: pretty
+
+gems:
+          - jekyll-sitemap
