@@ -1,0 +1,639 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>丑矬穷</title>
+    <description>又一个github-jekyll博客</description>
+    <link>http://lbp.im/blog/blog/</link>
+    <atom:link href="http://lbp.im/blog/blog/feed.xml" rel="self" type="application/rss+xml" />
+    <pubDate>Wed, 27 Aug 2014 08:17:45 -0700</pubDate>
+    <lastBuildDate>Wed, 27 Aug 2014 08:17:45 -0700</lastBuildDate>
+    <generator>Jekyll v2.2.0</generator>
+    
+      <item>
+        <title>抛弃IIS，利用FastCGI让Asp.net与Nginx在一起</title>
+        <description>&lt;ol&gt;
+&lt;li&gt;用virtualbox建Linux虚拟机，桥接网卡，让Linux和Windows在一个局域网内。&lt;/li&gt;
+&lt;li&gt;Linux上安装Nginx，Nginx新建一个网站，域名随便（在hosts文件中把域名指向127.0.0.1即可），关键配置如下：&lt;br&gt;
+server&lt;em&gt;name  fcgitest.com;&lt;br&gt;
+location / {&lt;br&gt;
+    fastcgi&lt;/em&gt;pass   10.0.30.222:9000;#Windows上.Net的FastCGI端口&lt;br&gt;
+    include        fastcgi_params;&lt;br&gt;
+}&lt;/li&gt;
+&lt;li&gt;Windows上，下载&lt;a href=&quot;https://github.com/wmeyer/SharpCGI/downloads&quot; title=&quot;SharpCGI-0.2-Precompiled.zip&quot;&gt;https://github.com/wmeyer/SharpCGI/downloads&lt;/a&gt;，为了简单，直接打开里面的FastCGIAppCSharp项目，监听Ip改为0.0.0.0。&lt;/li&gt;
+&lt;li&gt;Windows上，在hosts文件中把域名指向Linux的Ip，在浏览器中打开域名，应该可以看到正确的结果了。&lt;/li&gt;
+&lt;li&gt;下面再用ab做个压力测试&lt;br&gt;
+sudo apt-get install apache2-utils&lt;br&gt;
+ab -c 100 -n 9000 http://fcgitest.com/&lt;br&gt;
+&amp;gt; Requests per second:    1742.95 &lt;a href=&quot;mean&quot;&gt;#/sec&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;小结：Linux和Nginx未做如何调优，Nginx默认主页并发是4000多左右，这个结果勉强还可以，毕竟抛弃了笨重的IIS。下一步可以做更多的测试及调优，毕竟这样操作还需要把MVC框架整合进来，如果没有明显的性能提升，谁也不想这么折腾。Mono也提供了FastCGI服务器，但是Mono的坑太多，折腾不起。事情到了这，我不禁想要是Delphi也实现了FastCGI，还不如用Delphi呢，能给一个.NET活下去的理由么？貌似也只剩下快速开发这一项了，对，.NET施展最多的领域小型企业应用，这种不怎么赚钱的项目，老板怎么肯花钱？.Net开发人员的工资也必然比较低。&lt;/p&gt;
+
+&lt;p&gt;下面再做一个.NET服务器集群&lt;br&gt;
+修改Nginx的域名配置文件，关键部分&lt;br&gt;
+    upstream fastcgi {&lt;br&gt;
+        server 10.0.30.222:9000;&lt;br&gt;
+        server 10.0.30.223:9000 ;&lt;br&gt;
+    }&lt;br&gt;
+    server&lt;em&gt;name  fcgitest.com;&lt;br&gt;
+    location / {&lt;br&gt;
+        fastcgi&lt;/em&gt;pass   fastcgi;&lt;br&gt;
+        include        fastcgi_params;&lt;br&gt;
+    }&lt;br&gt;
+再次进行压力测试，结果：  &lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Requests per second:2567.90 &lt;a href=&quot;mean&quot;&gt;#/sec&lt;/a&gt;  &lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;strong&gt;并发提高了一倍&lt;/strong&gt;。这里可能有人会问Session的问题，Windows上有自带的Session服务，可以独立一台服务器用来存放Session。&lt;/p&gt;
+</description>
+        <pubDate>Wed, 27 Aug 2014 00:00:00 -0700</pubDate>
+        <link>http://lbp.im/blog/blog/2014/08/27/%E6%8A%9B%E5%BC%83IIS%EF%BC%8C%E5%88%A9%E7%94%A8FastCGI%E8%AE%A9Asp.net%E4%B8%8ENginx%E5%9C%A8%E4%B8%80%E8%B5%B7/</link>
+        <guid isPermaLink="true">http://lbp.im/blog/blog/2014/08/27/%E6%8A%9B%E5%BC%83IIS%EF%BC%8C%E5%88%A9%E7%94%A8FastCGI%E8%AE%A9Asp.net%E4%B8%8ENginx%E5%9C%A8%E4%B8%80%E8%B5%B7/</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>牛顿法求平方根</title>
+        <description>&lt;p&gt;&lt;a href=&quot;http://tour.golang.org/#25&quot; title=&quot;牛顿法求平方根&quot;&gt;http://tour.golang.org/#25&lt;/a&gt;&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;package main
+
+import (
+    &amp;quot;fmt&amp;quot;
+)
+
+func Sqrt(x float64) float64 {
+    var z float64 = 1.5
+    for i := 0; i &amp;lt; 3; i++ {
+        z = z - (z*z-x)/2.0/z
+        fmt.Println(z)
+    }
+    return z
+}
+
+func main() {
+    fmt.Println(Sqrt(2))
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;1.4166666666666667&lt;/p&gt;
+
+&lt;p&gt;1.4142156862745099&lt;/p&gt;
+
+&lt;p&gt;1.4142135623746899&lt;/p&gt;
+
+&lt;p&gt;1.4142135623746899&lt;/p&gt;
+</description>
+        <pubDate>Fri, 22 Aug 2014 00:00:00 -0700</pubDate>
+        <link>http://lbp.im/blog/blog/2014/08/22/golang%E5%AE%9E%E7%8E%B0%E7%89%9B%E9%A1%BF%E6%B3%95%E6%B1%82%E5%B9%B3%E6%96%B9%E6%A0%B9/</link>
+        <guid isPermaLink="true">http://lbp.im/blog/blog/2014/08/22/golang%E5%AE%9E%E7%8E%B0%E7%89%9B%E9%A1%BF%E6%B3%95%E6%B1%82%E5%B9%B3%E6%96%B9%E6%A0%B9/</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>测试Golang的性能，真让人眼前一亮</title>
+        <description>&lt;p&gt;18000并发秒杀IIs，有木有！&lt;/p&gt;
+
+&lt;p&gt;单机测试环境Cpu:I7,ubutun &lt;/p&gt;
+
+&lt;p&gt;每秒18000的处理速度，不得不让人佩服，虽然只是Hello world&lt;/p&gt;
+
+&lt;p&gt;IIS的结果只有这个的1/10&lt;/p&gt;
+
+&lt;p&gt;This is GoHttpBench, Version 0.1.9, https://github.com/parkghost/gohttpbench&lt;/p&gt;
+
+&lt;p&gt;Author: Brandon Chen, Email: parkghost@gmail.com&lt;/p&gt;
+
+&lt;p&gt;Licensed under the MIT license&lt;/p&gt;
+
+&lt;p&gt;Benchmarking 127.0.0.1 (be patient)&lt;/p&gt;
+
+&lt;p&gt;Finished 1000 requests&lt;/p&gt;
+
+&lt;p&gt;Server Hostname:        127.0.0.1&lt;/p&gt;
+
+&lt;p&gt;Server Port:            8080&lt;/p&gt;
+
+&lt;p&gt;Document Path:          /go&lt;/p&gt;
+
+&lt;p&gt;Document Length:        18 bytes&lt;/p&gt;
+
+&lt;p&gt;Concurrency Level:      10&lt;/p&gt;
+
+&lt;p&gt;Time taken for tests:   0.05 seconds&lt;/p&gt;
+
+&lt;p&gt;Complete requests:      1000&lt;/p&gt;
+
+&lt;p&gt;Failed requests:        0&lt;/p&gt;
+
+&lt;p&gt;HTML transferred:       18000 bytes&lt;/p&gt;
+
+&lt;p&gt;Requests per second:    18472.34 &lt;a href=&quot;mean&quot;&gt;#/sec&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Time per request:       0.541 &lt;a href=&quot;mean&quot;&gt;ms&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Time per request:       0.054 &lt;a href=&quot;mean,%20across%20all%20concurrent%20requests&quot;&gt;ms&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;HTML Transfer rate:     314.03 [Kbytes/sec] received&lt;/p&gt;
+
+&lt;p&gt;100%    7 (longest request)&lt;/p&gt;
+</description>
+        <pubDate>Mon, 11 Aug 2014 16:59:33 -0700</pubDate>
+        <link>http://lbp.im/blog/blog/2014/08/11/%E6%B5%8B%E8%AF%95Golang%E7%9A%84%E6%80%A7%E8%83%BD%EF%BC%8C%E7%9C%9F%E8%AE%A9%E4%BA%BA%E7%9C%BC%E5%89%8D%E4%B8%80%E4%BA%AE/</link>
+        <guid isPermaLink="true">http://lbp.im/blog/blog/2014/08/11/%E6%B5%8B%E8%AF%95Golang%E7%9A%84%E6%80%A7%E8%83%BD%EF%BC%8C%E7%9C%9F%E8%AE%A9%E4%BA%BA%E7%9C%BC%E5%89%8D%E4%B8%80%E4%BA%AE/</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>HEVC(H.265)初体验</title>
+        <description>&lt;p&gt;之前使用迅雷看看体验过，这次开始研究编解码，下面是开源项目
+http://ffmpeg.org/
+http://www.libde265.org/
+http://www.videolan.org/developers/x265.html
+第2个开源项目提供样片，下载了1个10分钟的动画片，2个版本，分别是1080P和720P的
+分别使用ffplay和vlc播放，播放器播放效果基本相同，但是不同分辨率差异很大。
+我的电脑是09年的AMD四核，播放时CPU基本满载。
+播放1080P，卡顿十分严重，CPU80%，无法观看
+播放720P，能够流畅播放，比264效果好，CPU60%，能够观看&lt;/p&gt;
+
+&lt;p&gt;http://www.free-codecs.com/download/x265GUI.htm&lt;/p&gt;
+
+&lt;p&gt;http://ifme.sourceforge.net/&lt;/p&gt;
+
+&lt;p&gt;ffmpeg -i 01.avi -c:v rawvideo -pix_fmt yuv420p 01.yuv&lt;/p&gt;
+
+&lt;p&gt;x265 --input-res 720x480 --fps 24000/100 01.yuv -o 01.h265&lt;/p&gt;
+
+&lt;p&gt;../program/ffmpeg/ffmpeg -i 01.avi -c:v libx265 -c:a copy 01.mp4&lt;/p&gt;
+</description>
+        <pubDate>Mon, 11 Aug 2014 16:59:33 -0700</pubDate>
+        <link>http://lbp.im/blog/blog/2014/08/11/HEVC%EF%BC%88H265%EF%BC%89%E5%88%9D%E4%BD%93%E9%AA%8C/</link>
+        <guid isPermaLink="true">http://lbp.im/blog/blog/2014/08/11/HEVC%EF%BC%88H265%EF%BC%89%E5%88%9D%E4%BD%93%E9%AA%8C/</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>不识货的公司，还是离开为好</title>
+        <description>&lt;p&gt;正在做一个功能，原来每天手动将数据处理后，导入数据库，改造成自动每小时一次自动导入，基本无需人工干预，入库速度从原来的一小时提高到几分钟。&lt;/p&gt;
+
+&lt;p&gt;本来很有成就感的事情，被领导迎面泼了一瓢凉水，刚做好核心功能，还正在调试修改，突然被领导发现了一个测试数据的问题，被大作文章，被人各种怀疑能力。&lt;/p&gt;
+
+&lt;p&gt;另一个同事，他做的一个功能，我在调用时，发现70M的数据导入需要一小时。他被提升，安排做大数据大并发。&lt;/p&gt;
+
+&lt;p&gt;这样的公司领导属于不识货的类型，我出卖我的劳动力给公司，公司不识好的坏的，这样的买卖还要和公司继续做下去吗？&lt;/p&gt;
+
+&lt;p&gt;换个公司吧，最起码是个识货的公司。&lt;/p&gt;
+</description>
+        <pubDate>Mon, 11 Aug 2014 16:10:41 -0700</pubDate>
+        <link>http://lbp.im/blog/blog/2014/08/11/%E4%B8%8D%E8%AF%86%E8%B4%A7%E7%9A%84%E5%85%AC%E5%8F%B8%EF%BC%8C%E8%BF%98%E6%98%AF%E7%A6%BB%E5%BC%80%E4%B8%BA%E5%A5%BD/</link>
+        <guid isPermaLink="true">http://lbp.im/blog/blog/2014/08/11/%E4%B8%8D%E8%AF%86%E8%B4%A7%E7%9A%84%E5%85%AC%E5%8F%B8%EF%BC%8C%E8%BF%98%E6%98%AF%E7%A6%BB%E5%BC%80%E4%B8%BA%E5%A5%BD/</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>详解电脑、智能和云到底是什么？</title>
+        <description>&lt;h2&gt;前言&lt;/h2&gt;
+
+&lt;p&gt;1953年提出电脑模型&lt;/p&gt;
+
+&lt;h2&gt;普通电脑&lt;/h2&gt;
+
+&lt;p&gt;多台电脑相连，就变成了云计算&lt;/p&gt;
+
+&lt;h2&gt;嵌入式&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Linux，+通话=智能手机&lt;/li&gt;
+&lt;li&gt;智能手机连接云计算=智能云手机&lt;/li&gt;
+&lt;li&gt;+无线网卡+拨号=智能路由器，播放视频、下载&lt;/li&gt;
+&lt;li&gt;智能路由器连接云计算，保存文件到云计算，=智能云路由器&lt;/li&gt;
+&lt;li&gt;(内嵌)+电视=智能电视&lt;/li&gt;
+&lt;li&gt;智能电视+云计算=智能云电视&lt;/li&gt;
+&lt;li&gt;+外置=盒子&lt;/li&gt;
+&lt;li&gt;+手表&lt;/li&gt;
+&lt;li&gt;+眼镜&lt;/li&gt;
+&lt;li&gt;+汽车&lt;/li&gt;
+&lt;li&gt;+飞机&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Wed, 04 Jun 2014 15:00:05 -0700</pubDate>
+        <link>http://lbp.im/blog/blog/2014/06/04/%E8%AF%A6%E8%A7%A3%E7%94%B5%E8%84%91%E3%80%81%E6%99%BA%E8%83%BD%E5%92%8C%E4%BA%91%E5%88%B0%E5%BA%95%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F/</link>
+        <guid isPermaLink="true">http://lbp.im/blog/blog/2014/06/04/%E8%AF%A6%E8%A7%A3%E7%94%B5%E8%84%91%E3%80%81%E6%99%BA%E8%83%BD%E5%92%8C%E4%BA%91%E5%88%B0%E5%BA%95%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F/</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>2014-06-04工作笔记</title>
+        <description>&lt;ul&gt;
+&lt;li&gt;百度云盘psc&lt;/li&gt;
+&lt;li&gt;psc权限，状态：应用对接中，即可使用&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;调用Python版的bypy，bypy有文件MD5错误，只好自己写&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;秒传文件功能需要以下参数&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;文件的md5&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;文件开头的md5，read当前位置&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;crc32无用，非必须&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;文件的长度&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Wed, 04 Jun 2014 14:59:33 -0700</pubDate>
+        <link>http://lbp.im/blog/blog/2014/06/04/%E5%B7%A5%E4%BD%9C%E7%AC%94%E8%AE%B0/</link>
+        <guid isPermaLink="true">http://lbp.im/blog/blog/2014/06/04/%E5%B7%A5%E4%BD%9C%E7%AC%94%E8%AE%B0/</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Mono环境搭建运行BlogEngine.Net笔记</title>
+        <description>&lt;h3&gt;演示&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://be.lbp.im:8080/&quot;&gt;http://be.lbp.im:8080/&lt;/a&gt;  &lt;/p&gt;
+
+&lt;h3&gt;安装步骤&lt;/h3&gt;
+
+&lt;p&gt;1.开源地址&lt;a href=&quot;http://blogengine.codeplex.com/&quot;&gt;http://blogengine.codeplex.com/&lt;/a&gt;使用2.8版本,不用2.9&lt;br&gt;
+2.Ubuntu安装&lt;code&gt;apt-get xsp4&lt;/code&gt;&lt;br&gt;
+3.执行网站目录下/setup/mono/setup.sh脚本&lt;br&gt;
+4.重命名网站Bin目录下的Microsoft.Web.Infrastructure.dll.bak(适用任何Mono程序)  &lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;NOTE: Do NOT copy the Microsoft.Web.Infrastructure assembly.  This assembly has been rebuilt in the mono library and will already be available to your app. 
+&lt;a href=&quot;http://www.integratedwebsystems.com/2011/06/get-mvc3-razor-running-on-mono/&quot;&gt;参考来源&lt;/a&gt;  &lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;5.运行方式Nginx+FastCGI&lt;br&gt;
+&lt;code&gt;fastcgi-mono-server4 /socket=tcp:127.0.0.1:9000 /applications=be.lbp.im:/:/opt/BlogEngine.NET/ /multiplex=True&lt;/code&gt;&lt;br&gt;
+这种方式总报错，但是可以支持大并发。&lt;br&gt;
+另一种无错运行，适合小网站，网站目录下执行&lt;br&gt;
+&lt;code&gt;xsp4 &amp;amp;&lt;/code&gt;&lt;br&gt;
+6.默认使用XML保存数据,账号密码admin:admin,初始化,进入建新的管理员,删除admin.
+7.（可选）转为SqlIte,使用Mono.Data.Sqlite.dll,先安装sqlite3,
+&lt;code&gt;sudo apt-get install sqlite3&lt;/code&gt;&lt;br&gt;
+8.复制setup/SQLite/BlogEngine.s3db到App_Data下面&lt;br&gt;
+9.备份Web.Config,使用下面的配置文件&lt;br&gt;
+注意:Mono.Data.Sqlite和System.Data.SQLite,这里区分大小写,我在这儿折腾了好久.&lt;br&gt;
+下面是配置文件重点修改的地方，也可以直接复制分割线下面的配置文件&lt;br&gt;
+&lt;code&gt;
+&amp;lt;system.data&amp;gt;
+    &amp;lt;DbProviderFactories&amp;gt;
+      &amp;lt;!-- &amp;lt;remove invariant=&amp;quot;System.Data.SQLite&amp;quot;/&amp;gt;
+      &amp;lt;add name=&amp;quot;SQLite Data Provider&amp;quot; invariant=&amp;quot;System.Data.SQLite&amp;quot; description=&amp;quot;.Net Framework Data Provider for SQLite&amp;quot; type=&amp;quot;System.Data.SQLite.SQLiteFactory, System.Data.SQLite&amp;quot;/&amp;gt; --&amp;gt;
+      &amp;lt;remove invariant=&amp;quot;Mono.Data.Sqlite&amp;quot;/&amp;gt;
+      &amp;lt;add name=&amp;quot;SQLite Data Provider&amp;quot; invariant=&amp;quot;Mono.Data.Sqlite&amp;quot; description=&amp;quot;.Net Framework Data Provider for SQLite&amp;quot; type=&amp;quot;Mono.Data.SQLite.SqliteFactory, Mono.Data.Sqlite&amp;quot;/&amp;gt;
+      &amp;lt;/DbProviderFactories&amp;gt;
+      &amp;lt;/system.data&amp;gt;  
+     &amp;lt;compilation debug=&amp;quot;true&amp;quot; targetFramework=&amp;quot;4.0&amp;quot;&amp;gt;
+      &amp;lt;assemblies&amp;gt;
+        &amp;lt;add assembly=&amp;quot;Mono.Data.Sqlite, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756&amp;quot; /&amp;gt;
+      &amp;lt;/assemblies&amp;gt;
+&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&amp;lt;?xml version=&amp;quot;1.0&amp;quot;?&amp;gt;
+&amp;lt;configuration&amp;gt;
+  &amp;lt;configSections&amp;gt;
+    &amp;lt;sectionGroup name=&amp;quot;BlogEngine&amp;quot;&amp;gt;
+          &amp;lt;section name=&amp;quot;blogProvider&amp;quot; requirePermission=&amp;quot;false&amp;quot; type=&amp;quot;BlogEngine.Core.Providers.BlogProviderSection, BlogEngine.Core&amp;quot; allowDefinition=&amp;quot;MachineToApplication&amp;quot; restartOnExternalChanges=&amp;quot;true&amp;quot;/&amp;gt;
+            &amp;lt;section name=&amp;quot;blogFileSystemProvider&amp;quot; requirePermission=&amp;quot;false&amp;quot; type=&amp;quot;BlogEngine.Core.Providers.BlogFileSystemProviderSection, BlogEngine.Core&amp;quot; allowDefinition=&amp;quot;MachineToApplication&amp;quot; restartOnExternalChanges=&amp;quot;true&amp;quot;/&amp;gt;
+          &amp;lt;/sectionGroup&amp;gt;
+      &amp;lt;/configSections&amp;gt;
+    &amp;lt;BlogEngine&amp;gt;
+      &amp;lt;blogProvider defaultProvider=&amp;quot;DbBlogProvider&amp;quot; fileStoreProvider=&amp;quot;XmlBlogProvider&amp;quot;&amp;gt;
+          &amp;lt;providers&amp;gt;
+              &amp;lt;add description=&amp;quot;Xml Blog Provider&amp;quot; name=&amp;quot;XmlBlogProvider&amp;quot; type=&amp;quot;BlogEngine.Core.Providers.XmlBlogProvider, BlogEngine.Core&amp;quot;/&amp;gt;
+                &amp;lt;add connectionStringName=&amp;quot;BlogEngine&amp;quot; description=&amp;quot;Sql Database Provider&amp;quot; name=&amp;quot;DbBlogProvider&amp;quot; type=&amp;quot;BlogEngine.Core.Providers.DbBlogProvider, BlogEngine.Core&amp;quot;/&amp;gt;
+              &amp;lt;/providers&amp;gt;
+          &amp;lt;/blogProvider&amp;gt;
+        &amp;lt;blogFileSystemProvider defaultProvider=&amp;quot;XmlBlogProvider&amp;quot;&amp;gt;
+          &amp;lt;providers&amp;gt;
+              &amp;lt;add description=&amp;quot;Xml Blog Provider&amp;quot; name=&amp;quot;XmlBlogProvider&amp;quot; type=&amp;quot;BlogEngine.Core.Providers.XmlFileSystemProvider, BlogEngine.Core&amp;quot;/&amp;gt;
+                &amp;lt;add storageVariable=&amp;quot;BlogEngine&amp;quot; description=&amp;quot;Sql Database Provider&amp;quot; name=&amp;quot;DbBlogProvider&amp;quot; type=&amp;quot;BlogEngine.Core.Providers.DbFileSystemProvider, BlogEngine.Core&amp;quot;/&amp;gt;
+                &amp;lt;!--&amp;lt;add storageVariable=&amp;quot;\\UNCPath\BlogFiles&amp;quot; description=&amp;quot;UNC Path Provider&amp;quot; name=&amp;quot;UNCBlogProvider&amp;quot; type=&amp;quot;BlogEngine.Core.Providers.UNCFileSystemProvider, BlogEngine.Core&amp;quot; /&amp;gt;--&amp;gt;
+              &amp;lt;/providers&amp;gt;
+          &amp;lt;/blogFileSystemProvider&amp;gt;
+      &amp;lt;/BlogEngine&amp;gt;
+    &amp;lt;connectionStrings&amp;gt;
+      &amp;lt;clear/&amp;gt;
+        &amp;lt;add name=&amp;quot;BlogEngine&amp;quot; connectionString=&amp;quot;Data Source=|DataDirectory|/BlogEngine.s3db;Version=3;BinaryGUID=False;&amp;quot; providerName=&amp;quot;Mono.Data.SQLite&amp;quot;/&amp;gt;
+      &amp;lt;/connectionStrings&amp;gt;
+    &amp;lt;appSettings&amp;gt;
+      &amp;lt;add key=&amp;quot;BlogEngine.FileExtension&amp;quot; value=&amp;quot;.aspx&amp;quot;/&amp;gt;
+        &amp;lt;!-- You can e.g. use &amp;quot;~/blog/&amp;quot; if BlogEngine.NET is not located in the root of the application --&amp;gt;
+        &amp;lt;add key=&amp;quot;BlogEngine.VirtualPath&amp;quot; value=&amp;quot;~/&amp;quot;/&amp;gt;
+        &amp;lt;!-- The regex used to identify mobile devices so a different theme can be shown --&amp;gt;
+        &amp;lt;add key=&amp;quot;BlogEngine.MobileDevices&amp;quot; value=&amp;quot;(iemobile|iphone|ipod|android|nokia|sonyericsson|blackberry|samsung|sec\-|windows ce|motorola|mot\-|up.b|midp\-)&amp;quot;/&amp;gt;
+        &amp;lt;!-- The name of the role with administrator permissions --&amp;gt;
+        &amp;lt;add key=&amp;quot;BlogEngine.AdminRole&amp;quot; value=&amp;quot;Administrators&amp;quot;/&amp;gt;
+        &amp;lt;!-- The name of the role for anonymous(non-authenticated) users. --&amp;gt;
+        &amp;lt;add key=&amp;quot;BlogEngine.AnonymousRole&amp;quot; value=&amp;quot;Anonymous&amp;quot;/&amp;gt;
+        &amp;lt;!-- The name of the role for Editors --&amp;gt;
+        &amp;lt;add key=&amp;quot;BlogEngine.EditorsRole&amp;quot; value=&amp;quot;Editors&amp;quot;/&amp;gt;
+        &amp;lt;!--This value is to provide an alternative location for storing data.--&amp;gt;
+        &amp;lt;add key=&amp;quot;StorageLocation&amp;quot; value=&amp;quot;~/App_Data/&amp;quot;/&amp;gt;
+        &amp;lt;!--This value is the folder name under the StorageLocation that data for blog instances will be stored in.--&amp;gt;
+        &amp;lt;add key=&amp;quot;BlogInstancesFolderName&amp;quot; value=&amp;quot;blogs&amp;quot;/&amp;gt;
+        &amp;lt;!--A comma separated list of script names to hard minify. It&amp;#39;s case-sensitive. --&amp;gt;
+        &amp;lt;add key=&amp;quot;BlogEngine.HardMinify&amp;quot; value=&amp;quot;blog.js,widget.js,WebResource.axd&amp;quot;/&amp;gt;
+        &amp;lt;!--Any data grid in the admin panel should use this value for default number of items per page.--&amp;gt;
+        &amp;lt;add key=&amp;quot;BlogEngine.GenericPageSize&amp;quot; value=&amp;quot;20&amp;quot;/&amp;gt;
+      &amp;lt;/appSettings&amp;gt;
+    &amp;lt;system.serviceModel&amp;gt;
+      &amp;lt;services&amp;gt;
+          &amp;lt;service behaviorConfiguration=&amp;quot;AuthenticationServiceBehaviors&amp;quot; name=&amp;quot;System.Web.ApplicationServices.AuthenticationService&amp;quot;&amp;gt;
+              &amp;lt;endpoint binding=&amp;quot;basicHttpBinding&amp;quot; contract=&amp;quot;System.Web.ApplicationServices.AuthenticationService&amp;quot;/&amp;gt;
+              &amp;lt;/service&amp;gt;
+          &amp;lt;/services&amp;gt;
+        &amp;lt;serviceHostingEnvironment aspNetCompatibilityEnabled=&amp;quot;true&amp;quot;/&amp;gt;
+        &amp;lt;behaviors&amp;gt;
+          &amp;lt;serviceBehaviors&amp;gt;
+              &amp;lt;behavior name=&amp;quot;AuthenticationServiceBehaviors&amp;quot;&amp;gt;
+                  &amp;lt;serviceMetadata httpGetEnabled=&amp;quot;true&amp;quot;/&amp;gt;
+                  &amp;lt;/behavior&amp;gt;
+              &amp;lt;/serviceBehaviors&amp;gt;
+          &amp;lt;/behaviors&amp;gt;
+      &amp;lt;/system.serviceModel&amp;gt;
+    &amp;lt;system.web.extensions&amp;gt;
+      &amp;lt;scripting&amp;gt;
+          &amp;lt;webServices&amp;gt;
+              &amp;lt;authenticationService enabled=&amp;quot;true&amp;quot; requireSSL=&amp;quot;false&amp;quot;/&amp;gt;
+              &amp;lt;/webServices&amp;gt;
+          &amp;lt;/scripting&amp;gt;
+      &amp;lt;/system.web.extensions&amp;gt;
+    &amp;lt;system.data&amp;gt;
+      &amp;lt;DbProviderFactories&amp;gt;
+          &amp;lt;!-- &amp;lt;remove invariant=&amp;quot;System.Data.SQLite&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;SQLite Data Provider&amp;quot; invariant=&amp;quot;System.Data.SQLite&amp;quot; description=&amp;quot;.Net Framework Data Provider for SQLite&amp;quot; type=&amp;quot;System.Data.SQLite.SQLiteFactory, System.Data.SQLite&amp;quot;/&amp;gt; --&amp;gt;
+            &amp;lt;remove invariant=&amp;quot;Mono.Data.Sqlite&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;SQLite Data Provider&amp;quot; invariant=&amp;quot;Mono.Data.Sqlite&amp;quot; description=&amp;quot;.Net Framework Data Provider for SQLite&amp;quot; type=&amp;quot;Mono.Data.SQLite.SqliteFactory, Mono.Data.Sqlite&amp;quot;/&amp;gt;
+          &amp;lt;/DbProviderFactories&amp;gt;
+      &amp;lt;/system.data&amp;gt;  
+    &amp;lt;system.web&amp;gt;
+      &amp;lt;webServices&amp;gt;
+          &amp;lt;protocols&amp;gt;
+              &amp;lt;add name=&amp;quot;HttpPost&amp;quot;/&amp;gt;
+                &amp;lt;add name=&amp;quot;HttpGet&amp;quot;/&amp;gt;
+              &amp;lt;/protocols&amp;gt;
+          &amp;lt;/webServices&amp;gt;
+        &amp;lt;compilation debug=&amp;quot;true&amp;quot; targetFramework=&amp;quot;4.0&amp;quot;&amp;gt;
+          &amp;lt;assemblies&amp;gt;
+              &amp;lt;add assembly=&amp;quot;System.Management, Version=4.0.0.0, Culture=neutral, PublicKeyToken=B03F5F7F11D50A3A&amp;quot;/&amp;gt;
+                &amp;lt;add assembly=&amp;quot;System.Configuration, Version=4.0.0.0, Culture=neutral, PublicKeyToken=B03F5F7F11D50A3A&amp;quot;/&amp;gt;
+                &amp;lt;add assembly=&amp;quot;System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=B77A5C561934E089&amp;quot;/&amp;gt;
+                &amp;lt;add assembly=&amp;quot;System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=B77A5C561934E089&amp;quot;/&amp;gt;
+                &amp;lt;add assembly=&amp;quot;System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=B03F5F7F11D50A3A&amp;quot;/&amp;gt;
+                &amp;lt;add assembly=&amp;quot;System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=B03F5F7F11D50A3A&amp;quot;/&amp;gt;
+                &amp;lt;add assembly=&amp;quot;System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=B77A5C561934E089&amp;quot;/&amp;gt;
+                &amp;lt;add assembly=&amp;quot;System.Web.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35&amp;quot;/&amp;gt;
+                &amp;lt;add assembly=&amp;quot;System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35&amp;quot;/&amp;gt;
+                &amp;lt;add assembly=&amp;quot;System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35&amp;quot;/&amp;gt;
+                &amp;lt;add assembly=&amp;quot;System.Web.WebPages.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35&amp;quot;/&amp;gt;
+                &amp;lt;add assembly=&amp;quot;Mono.Data.Sqlite, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756&amp;quot; /&amp;gt;
+              &amp;lt;/assemblies&amp;gt;
+            &amp;lt;!-- you may need it if you have issuew with razor/ajax in admin cshtml pages
+            &amp;lt;buildProviders&amp;gt;
+              &amp;lt;add extension=&amp;quot;.cshtml&amp;quot; type=&amp;quot;System.Web.WebPages.Razor.RazorBuildProvider, System.Web.WebPages.Razor&amp;quot;/&amp;gt;
+              &amp;lt;/buildProviders&amp;gt;
+            --&amp;gt;
+            &amp;lt;expressionBuilders&amp;gt;
+              &amp;lt;add expressionPrefix=&amp;quot;LinqLength&amp;quot; type=&amp;quot;BlogEngine.Core.Compilation.LinqLengthExpressionBuilder, BlogEngine.Core&amp;quot;/&amp;gt;
+                &amp;lt;add expressionPrefix=&amp;quot;Reflect&amp;quot; type=&amp;quot;BlogEngine.Core.Compilation.ReflectExpressionBuilder, BlogEngine.Core&amp;quot;/&amp;gt;
+                &amp;lt;add expressionPrefix=&amp;quot;Session&amp;quot; type=&amp;quot;BlogEngine.Core.Compilation.SessionExpressionBuilder, BlogEngine.Core&amp;quot;/&amp;gt;
+                &amp;lt;add expressionPrefix=&amp;quot;Server&amp;quot; type=&amp;quot;BlogEngine.Core.Compilation.ServerVariableExpressionBuilder, BlogEngine.Core&amp;quot;/&amp;gt;
+                &amp;lt;add expressionPrefix=&amp;quot;QueryString&amp;quot; type=&amp;quot;BlogEngine.Core.Compilation.QueryStringExpressionBuilder, BlogEngine.Core&amp;quot;/&amp;gt;
+                &amp;lt;add expressionPrefix=&amp;quot;Code&amp;quot; type=&amp;quot;BlogEngine.Core.Compilation.CodeExpressionBuilder, BlogEngine.Core&amp;quot;/&amp;gt;
+              &amp;lt;/expressionBuilders&amp;gt;
+          &amp;lt;/compilation&amp;gt;
+        &amp;lt;globalization requestEncoding=&amp;quot;utf-8&amp;quot; responseEncoding=&amp;quot;utf-8&amp;quot; culture=&amp;quot;auto&amp;quot; uiCulture=&amp;quot;auto&amp;quot;/&amp;gt;
+        &amp;lt;httpRuntime enableVersionHeader=&amp;quot;false&amp;quot; useFullyQualifiedRedirectUrl=&amp;quot;true&amp;quot; maxRequestLength=&amp;quot;16384&amp;quot; executionTimeout=&amp;quot;3600&amp;quot; requestLengthDiskThreshold=&amp;quot;16384&amp;quot; requestValidationMode=&amp;quot;2.0&amp;quot;/&amp;gt;
+        &amp;lt;machineKey validationKey=&amp;quot;D9F7287EFDE8DF4CAFF79011D5308643D8F62AE10CDF30DAB640B7399BF6C57B0269D60A23FBCCC736FC2487ED695512BA95044DE4C58DC02C2BA0C4A266454C&amp;quot; decryptionKey=&amp;quot;BDAAF7E00B69BA47B37EEAC328929A06A6647D4C89FED3A7D5C52B12B23680F4&amp;quot; validation=&amp;quot;SHA1&amp;quot; decryption=&amp;quot;AES&amp;quot;/&amp;gt;
+        &amp;lt;authentication mode=&amp;quot;Forms&amp;quot;&amp;gt;
+          &amp;lt;forms timeout=&amp;quot;129600&amp;quot; name=&amp;quot;.AUXBLOGENGINE&amp;quot; protection=&amp;quot;All&amp;quot; slidingExpiration=&amp;quot;true&amp;quot; loginUrl=&amp;quot;~/Account/login.aspx&amp;quot; cookieless=&amp;quot;UseCookies&amp;quot;/&amp;gt;
+          &amp;lt;/authentication&amp;gt;
+        &amp;lt;pages enableSessionState=&amp;quot;false&amp;quot; enableViewStateMac=&amp;quot;true&amp;quot; enableEventValidation=&amp;quot;true&amp;quot; controlRenderingCompatibilityVersion=&amp;quot;3.5&amp;quot; clientIDMode=&amp;quot;AutoID&amp;quot;&amp;gt;
+          &amp;lt;controls&amp;gt;
+              &amp;lt;add namespace=&amp;quot;App_Code.Controls&amp;quot; tagPrefix=&amp;quot;blog&amp;quot;/&amp;gt;
+              &amp;lt;/controls&amp;gt;
+          &amp;lt;/pages&amp;gt;
+        &amp;lt;customErrors mode=&amp;quot;RemoteOnly&amp;quot; defaultRedirect=&amp;quot;~/error.aspx&amp;quot; redirectMode=&amp;quot;ResponseRewrite&amp;quot;&amp;gt;
+          &amp;lt;error statusCode=&amp;quot;404&amp;quot; redirect=&amp;quot;~/error404.aspx&amp;quot;/&amp;gt;
+          &amp;lt;/customErrors&amp;gt;
+        &amp;lt;!--&amp;lt;trust level=&amp;quot;Medium&amp;quot;/&amp;gt;--&amp;gt;
+        &amp;lt;membership defaultProvider=&amp;quot;DbMembershipProvider&amp;quot;&amp;gt;
+          &amp;lt;providers&amp;gt;
+              &amp;lt;clear/&amp;gt;
+                &amp;lt;add name=&amp;quot;XmlMembershipProvider&amp;quot; type=&amp;quot;BlogEngine.Core.Providers.XmlMembershipProvider, BlogEngine.Core&amp;quot; description=&amp;quot;XML membership provider&amp;quot; passwordFormat=&amp;quot;Hashed&amp;quot;/&amp;gt;
+                &amp;lt;add name=&amp;quot;SqlMembershipProvider&amp;quot; type=&amp;quot;System.Web.Security.SqlMembershipProvider&amp;quot; connectionStringName=&amp;quot;BlogEngine&amp;quot; applicationName=&amp;quot;BlogEngine&amp;quot;/&amp;gt;
+                &amp;lt;add name=&amp;quot;DbMembershipProvider&amp;quot; type=&amp;quot;BlogEngine.Core.Providers.DbMembershipProvider, BlogEngine.Core&amp;quot; passwordFormat=&amp;quot;Hashed&amp;quot; connectionStringName=&amp;quot;BlogEngine&amp;quot;/&amp;gt;
+              &amp;lt;/providers&amp;gt;
+          &amp;lt;/membership&amp;gt;
+        &amp;lt;roleManager defaultProvider=&amp;quot;DbRoleProvider&amp;quot; enabled=&amp;quot;true&amp;quot; cacheRolesInCookie=&amp;quot;false&amp;quot;&amp;gt;
+          &amp;lt;providers&amp;gt;
+              &amp;lt;clear/&amp;gt;
+                &amp;lt;add name=&amp;quot;XmlRoleProvider&amp;quot; type=&amp;quot;BlogEngine.Core.Providers.XmlRoleProvider, BlogEngine.Core&amp;quot; description=&amp;quot;XML role provider&amp;quot;/&amp;gt;
+                &amp;lt;add name=&amp;quot;SqlRoleProvider&amp;quot; type=&amp;quot;System.Web.Security.SqlRoleProvider&amp;quot; connectionStringName=&amp;quot;BlogEngine&amp;quot; applicationName=&amp;quot;BlogEngine&amp;quot;/&amp;gt;
+                &amp;lt;add name=&amp;quot;DbRoleProvider&amp;quot; type=&amp;quot;BlogEngine.Core.Providers.DbRoleProvider, BlogEngine.Core&amp;quot; connectionStringName=&amp;quot;BlogEngine&amp;quot;/&amp;gt;
+              &amp;lt;/providers&amp;gt;
+          &amp;lt;/roleManager&amp;gt;
+        &amp;lt;siteMap defaultProvider=&amp;quot;PageSiteMap&amp;quot; enabled=&amp;quot;true&amp;quot;&amp;gt;
+          &amp;lt;providers&amp;gt;
+              &amp;lt;add name=&amp;quot;PageSiteMap&amp;quot; description=&amp;quot;The site map provider that reads in the .sitemap XML files.&amp;quot; type=&amp;quot;BlogEngine.Core.Web.Controls.PageSiteMap, BlogEngine.Core&amp;quot;/&amp;gt;
+                &amp;lt;add name=&amp;quot;SecuritySiteMap&amp;quot; description=&amp;quot;Used for authenticated users.&amp;quot; type=&amp;quot;BlogEngine.Core.SecuritySiteMapProvider, BlogEngine.Core&amp;quot; securityTrimmingEnabled=&amp;quot;true&amp;quot; siteMapFile=&amp;quot;Web.sitemap&amp;quot;/&amp;gt;
+              &amp;lt;/providers&amp;gt;
+          &amp;lt;/siteMap&amp;gt;
+        &amp;lt;httpModules&amp;gt;
+          &amp;lt;add name=&amp;quot;WwwSubDomainModule&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpModules.WwwSubDomainModule, BlogEngine.Core&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;UrlRewrite&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpModules.UrlRewrite, BlogEngine.Core&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;CompressionModule&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpModules.CompressionModule, BlogEngine.Core&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;ReferrerModule&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpModules.ReferrerModule, BlogEngine.Core&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;SecurityModule&amp;quot; type=&amp;quot;BlogEngine.Core.Security, BlogEngine.Core&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;RightModule&amp;quot; type=&amp;quot;BlogEngine.Core.Right, BlogEngine.Core&amp;quot;/&amp;gt;
+            &amp;lt;!--Remove the default ASP.NET modules we don&amp;#39;t need--&amp;gt;
+            &amp;lt;remove name=&amp;quot;PassportAuthentication&amp;quot;/&amp;gt;
+            &amp;lt;remove name=&amp;quot;Profile&amp;quot;/&amp;gt;
+            &amp;lt;remove name=&amp;quot;AnonymousIdentification&amp;quot;/&amp;gt;
+          &amp;lt;/httpModules&amp;gt;
+        &amp;lt;httpHandlers&amp;gt;
+          &amp;lt;add verb=&amp;quot;*&amp;quot; path=&amp;quot;file.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.FileHandler, BlogEngine.Core&amp;quot; validate=&amp;quot;false&amp;quot;/&amp;gt;
+            &amp;lt;add verb=&amp;quot;*&amp;quot; path=&amp;quot;image.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.ImageHandler, BlogEngine.Core&amp;quot; validate=&amp;quot;false&amp;quot;/&amp;gt;
+            &amp;lt;add verb=&amp;quot;*&amp;quot; path=&amp;quot;syndication.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.SyndicationHandler, BlogEngine.Core&amp;quot; validate=&amp;quot;false&amp;quot;/&amp;gt;
+            &amp;lt;add verb=&amp;quot;*&amp;quot; path=&amp;quot;sitemap.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.SiteMap, BlogEngine.Core&amp;quot; validate=&amp;quot;false&amp;quot;/&amp;gt;
+            &amp;lt;add verb=&amp;quot;*&amp;quot; path=&amp;quot;trackback.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.TrackbackHandler, BlogEngine.Core&amp;quot; validate=&amp;quot;false&amp;quot;/&amp;gt;
+            &amp;lt;add verb=&amp;quot;*&amp;quot; path=&amp;quot;pingback.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.PingbackHandler, BlogEngine.Core&amp;quot; validate=&amp;quot;false&amp;quot;/&amp;gt;
+            &amp;lt;add verb=&amp;quot;*&amp;quot; path=&amp;quot;opensearch.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.OpenSearchHandler, BlogEngine.Core&amp;quot; validate=&amp;quot;false&amp;quot;/&amp;gt;
+            &amp;lt;add verb=&amp;quot;*&amp;quot; path=&amp;quot;metaweblog.axd&amp;quot; type=&amp;quot;BlogEngine.Core.API.MetaWeblog.MetaWeblogHandler, BlogEngine.Core&amp;quot; validate=&amp;quot;false&amp;quot;/&amp;gt;
+            &amp;lt;add verb=&amp;quot;*&amp;quot; path=&amp;quot;rsd.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.RsdHandler, BlogEngine.Core&amp;quot; validate=&amp;quot;false&amp;quot;/&amp;gt;
+            &amp;lt;!--&amp;lt;add verb=&amp;quot;*&amp;quot; path=&amp;quot;css.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.CssHandler, BlogEngine.Core&amp;quot; validate=&amp;quot;false&amp;quot;/&amp;gt;--&amp;gt;
+            &amp;lt;add verb=&amp;quot;*&amp;quot; path=&amp;quot;*.js.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.JavaScriptHandler, BlogEngine.Core&amp;quot; validate=&amp;quot;false&amp;quot;/&amp;gt;
+            &amp;lt;add verb=&amp;quot;*&amp;quot; path=&amp;quot;*.res.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.ResourceHandler, BlogEngine.Core&amp;quot; validate=&amp;quot;false&amp;quot;/&amp;gt;
+            &amp;lt;add verb=&amp;quot;*&amp;quot; path=&amp;quot;rating.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.RatingHandler, BlogEngine.Core&amp;quot; validate=&amp;quot;false&amp;quot;/&amp;gt;
+            &amp;lt;add verb=&amp;quot;*&amp;quot; path=&amp;quot;opml.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.OpmlHandler, BlogEngine.Core&amp;quot; validate=&amp;quot;false&amp;quot;/&amp;gt;
+            &amp;lt;add verb=&amp;quot;*&amp;quot; path=&amp;quot;blogml.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.BlogMLExportHandler, BlogEngine.Core&amp;quot; validate=&amp;quot;false&amp;quot;/&amp;gt;
+            &amp;lt;add verb=&amp;quot;*&amp;quot; path=&amp;quot;sioc.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.Sioc, BlogEngine.Core&amp;quot; validate=&amp;quot;false&amp;quot;/&amp;gt;
+            &amp;lt;add verb=&amp;quot;*&amp;quot; path=&amp;quot;apml.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.Apml, BlogEngine.Core&amp;quot; validate=&amp;quot;false&amp;quot;/&amp;gt;
+            &amp;lt;add verb=&amp;quot;*&amp;quot; path=&amp;quot;foaf*.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.Foaf, BlogEngine.Core&amp;quot; validate=&amp;quot;false&amp;quot;/&amp;gt;
+            &amp;lt;add verb=&amp;quot;*&amp;quot; path=&amp;quot;*.htm&amp;quot; type=&amp;quot;System.Web.StaticFileHandler&amp;quot;/&amp;gt;
+          &amp;lt;/httpHandlers&amp;gt;
+      &amp;lt;/system.web&amp;gt;
+    &amp;lt;system.webServer&amp;gt;
+      &amp;lt;validation validateIntegratedModeConfiguration=&amp;quot;false&amp;quot;/&amp;gt;
+        &amp;lt;!-- Enable the staticContent section below to add Expires headers to images for better performance.
+             Some hosting providers does not allow the staticContent section to be set. --&amp;gt;
+             &amp;lt;!--
+        &amp;lt;staticContent&amp;gt;
+          &amp;lt;clientCache httpExpires=&amp;quot;Sun, 29 Mar 2020 00:00:00 GMT&amp;quot; cacheControlMode=&amp;quot;UseExpires&amp;quot; /&amp;gt;
+            &amp;lt;mimeMap fileExtension=&amp;quot;.mp4&amp;quot; mimeType=&amp;quot;video/mp4&amp;quot; /&amp;gt;
+          &amp;lt;/staticContent&amp;gt;
+        --&amp;gt;
+        &amp;lt;modules runAllManagedModulesForAllRequests=&amp;quot;true&amp;quot;&amp;gt;
+          &amp;lt;add name=&amp;quot;WwwSubDomainModule&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpModules.WwwSubDomainModule, BlogEngine.Core&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;UrlRewrite&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpModules.UrlRewrite, BlogEngine.Core&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;CompressionModule&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpModules.CompressionModule, BlogEngine.Core&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;ReferrerModule&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpModules.ReferrerModule, BlogEngine.Core&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;SecurityModule&amp;quot; type=&amp;quot;BlogEngine.Core.Security, BlogEngine.Core&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;RightModule&amp;quot; type=&amp;quot;BlogEngine.Core.Right, BlogEngine.Core&amp;quot;/&amp;gt;
+          &amp;lt;/modules&amp;gt;
+        &amp;lt;handlers accessPolicy=&amp;quot;Read, Write, Script, Execute&amp;quot;&amp;gt;
+          &amp;lt;add name=&amp;quot;FileHandler&amp;quot; verb=&amp;quot;*&amp;quot; path=&amp;quot;file.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.FileHandler, BlogEngine.Core&amp;quot; resourceType=&amp;quot;Unspecified&amp;quot; requireAccess=&amp;quot;Script&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;ImageHandler&amp;quot; verb=&amp;quot;*&amp;quot; path=&amp;quot;image.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.ImageHandler, BlogEngine.Core&amp;quot; resourceType=&amp;quot;Unspecified&amp;quot; requireAccess=&amp;quot;Script&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;Syndication&amp;quot; verb=&amp;quot;*&amp;quot; path=&amp;quot;syndication.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.SyndicationHandler, BlogEngine.Core&amp;quot; resourceType=&amp;quot;Unspecified&amp;quot; requireAccess=&amp;quot;Script&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;Sitemap&amp;quot; verb=&amp;quot;*&amp;quot; path=&amp;quot;sitemap.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.SiteMap, BlogEngine.Core&amp;quot; resourceType=&amp;quot;Unspecified&amp;quot; requireAccess=&amp;quot;Script&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;Trackback&amp;quot; verb=&amp;quot;*&amp;quot; path=&amp;quot;trackback.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.TrackbackHandler, BlogEngine.Core&amp;quot; resourceType=&amp;quot;Unspecified&amp;quot; requireAccess=&amp;quot;Script&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;Pingback&amp;quot; verb=&amp;quot;*&amp;quot; path=&amp;quot;pingback.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.PingbackHandler, BlogEngine.Core&amp;quot; resourceType=&amp;quot;Unspecified&amp;quot; requireAccess=&amp;quot;Script&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;OpenSearch&amp;quot; verb=&amp;quot;*&amp;quot; path=&amp;quot;opensearch.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.OpenSearchHandler, BlogEngine.Core&amp;quot; resourceType=&amp;quot;Unspecified&amp;quot; requireAccess=&amp;quot;Script&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;MetaWeblog&amp;quot; verb=&amp;quot;*&amp;quot; path=&amp;quot;metaweblog.axd&amp;quot; type=&amp;quot;BlogEngine.Core.API.MetaWeblog.MetaWeblogHandler, BlogEngine.Core&amp;quot; resourceType=&amp;quot;Unspecified&amp;quot; requireAccess=&amp;quot;Script&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;RSD&amp;quot; verb=&amp;quot;*&amp;quot; path=&amp;quot;rsd.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.RsdHandler, BlogEngine.Core&amp;quot; resourceType=&amp;quot;Unspecified&amp;quot; requireAccess=&amp;quot;Script&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot;/&amp;gt;
+            &amp;lt;!--&amp;lt;add name=&amp;quot;CssHandler&amp;quot; verb=&amp;quot;*&amp;quot; path=&amp;quot;css.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.CssHandler, BlogEngine.Core&amp;quot; resourceType=&amp;quot;Unspecified&amp;quot; requireAccess=&amp;quot;Script&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot;/&amp;gt;--&amp;gt;
+            &amp;lt;add name=&amp;quot;WebResource&amp;quot; path=&amp;quot;*.js.axd&amp;quot; verb=&amp;quot;*&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.JavaScriptHandler, BlogEngine.Core&amp;quot; resourceType=&amp;quot;Unspecified&amp;quot; requireAccess=&amp;quot;Script&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;Resource&amp;quot; verb=&amp;quot;*&amp;quot; path=&amp;quot;*.res.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.ResourceHandler, BlogEngine.Core&amp;quot; resourceType=&amp;quot;Unspecified&amp;quot; requireAccess=&amp;quot;Script&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;Rating&amp;quot; verb=&amp;quot;*&amp;quot; path=&amp;quot;rating.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.RatingHandler, BlogEngine.Core&amp;quot; resourceType=&amp;quot;Unspecified&amp;quot; requireAccess=&amp;quot;Script&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;Opml&amp;quot; verb=&amp;quot;*&amp;quot; path=&amp;quot;opml.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.OpmlHandler, BlogEngine.Core&amp;quot; resourceType=&amp;quot;Unspecified&amp;quot; requireAccess=&amp;quot;Script&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;BlogML&amp;quot; verb=&amp;quot;*&amp;quot; path=&amp;quot;blogml.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.BlogMLExportHandler, BlogEngine.Core&amp;quot; resourceType=&amp;quot;Unspecified&amp;quot; requireAccess=&amp;quot;Script&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;SIOC&amp;quot; verb=&amp;quot;*&amp;quot; path=&amp;quot;sioc.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.Sioc, BlogEngine.Core&amp;quot; resourceType=&amp;quot;Unspecified&amp;quot; requireAccess=&amp;quot;Script&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;Apml&amp;quot; verb=&amp;quot;*&amp;quot; path=&amp;quot;apml.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.Apml, BlogEngine.Core&amp;quot; resourceType=&amp;quot;Unspecified&amp;quot; requireAccess=&amp;quot;Script&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;Foaf&amp;quot; verb=&amp;quot;*&amp;quot; path=&amp;quot;foaf*.axd&amp;quot; type=&amp;quot;BlogEngine.Core.Web.HttpHandlers.Foaf, BlogEngine.Core&amp;quot; resourceType=&amp;quot;Unspecified&amp;quot; requireAccess=&amp;quot;Script&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;Html&amp;quot; path=&amp;quot;*.htm&amp;quot; verb=&amp;quot;*&amp;quot; type=&amp;quot;System.Web.StaticFileHandler&amp;quot; resourceType=&amp;quot;Unspecified&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot;/&amp;gt;
+            &amp;lt;add name=&amp;quot;ScriptHandlerFactory&amp;quot; verb=&amp;quot;*&amp;quot; path=&amp;quot;*.asmx&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot; type=&amp;quot;System.Web.Script.Services.ScriptHandlerFactory, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35&amp;quot; /&amp;gt;
+            &amp;lt;add name=&amp;quot;ScriptHandlerFactoryAppServices&amp;quot; verb=&amp;quot;*&amp;quot; path=&amp;quot;*_AppService.axd&amp;quot; preCondition=&amp;quot;integratedMode&amp;quot; type=&amp;quot;System.Web.Script.Services.ScriptHandlerFactory, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35&amp;quot; /&amp;gt;
+          &amp;lt;/handlers&amp;gt;
+        &amp;lt;!-- Enable the httpProtocol section below to manipulate some HTTP headers.
+             Some hosting providers does not allow the httpProtocol section to be set. --&amp;gt;
+             &amp;lt;!--
+        &amp;lt;httpProtocol&amp;gt;
+          &amp;lt;customHeaders&amp;gt;
+              &amp;lt;remove name=&amp;quot;X-Powered-By&amp;quot; /&amp;gt;
+                &amp;lt;add name=&amp;quot;Etag&amp;quot; value=&amp;quot; &amp;quot; /&amp;gt;
+              &amp;lt;/customHeaders&amp;gt;
+          &amp;lt;/httpProtocol&amp;gt;
+        --&amp;gt;
+        &amp;lt;!-- enables compression in IIS 7
+        &amp;lt;urlCompression doDynamicCompression=&amp;quot;true&amp;quot; doStaticCompression=&amp;quot;true&amp;quot; dynamicCompressionBeforeCache=&amp;quot;true&amp;quot;/&amp;gt;
+        --&amp;gt;
+        &amp;lt;staticContent&amp;gt;
+            &amp;lt;clientCache cacheControlMode=&amp;quot;UseMaxAge&amp;quot; cacheControlMaxAge=&amp;quot;365.00:00:00&amp;quot; cacheControlCustom=&amp;quot;public&amp;quot;/&amp;gt;
+                &amp;lt;remove fileExtension=&amp;quot;.ico&amp;quot;/&amp;gt;
+                &amp;lt;mimeMap fileExtension=&amp;quot;.ico&amp;quot; mimeType=&amp;quot;image/x-icon&amp;quot;/&amp;gt;
+            &amp;lt;/staticContent&amp;gt;
+      &amp;lt;/system.webServer&amp;gt;
+      &amp;lt;/configuration&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
+        <pubDate>Wed, 04 Jun 2014 14:59:33 -0700</pubDate>
+        <link>http://lbp.im/blog/blog/2014/06/04/Mono%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E8%BF%90%E8%A1%8CBlogEngine.Net%E7%AC%94%E8%AE%B0/</link>
+        <guid isPermaLink="true">http://lbp.im/blog/blog/2014/06/04/Mono%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E8%BF%90%E8%A1%8CBlogEngine.Net%E7%AC%94%E8%AE%B0/</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Echarts使用心得</title>
+        <description>&lt;p&gt;今天给影业（略去详细名称）的同事展示使用Echarts做好的几张报表，大家似乎比较感兴趣，Echarts确实给大家带来了震撼力，但是在报表制作过程中，也感觉到了Echarts文档存在很多不完整的地方。&lt;/p&gt;
+
+&lt;p&gt;文档其实是非常详细的，特别是面对小白，更像是百度百科、百度经验，更详细更深入的就很少了。
+窃以为，文档应该是分为入门、进阶和高级3个阶段，这样才能解决不同人不同的需求，Echarts解决了入门和初步进阶，高级部分基本是真空。&lt;/p&gt;
+</description>
+        <pubDate>Thu, 29 May 2014 14:49:08 -0700</pubDate>
+        <link>http://lbp.im/blog/blog/2014/05/29/echarts%E4%BD%BF%E7%94%A8%E5%BF%83%E5%BE%97/</link>
+        <guid isPermaLink="true">http://lbp.im/blog/blog/2014/05/29/echarts%E4%BD%BF%E7%94%A8%E5%BF%83%E5%BE%97/</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>c#并行编程——线程间通过队列进行通讯</title>
+        <description>&lt;p&gt;C#并行编程，最大的麻烦是线程的控制、线程间的通讯。
+线程间通讯之前都是使用lock，但是非常容易死锁，而且性能也不好。
+.NET4之后，有几个类，让情况好了很多&lt;/p&gt;
+
+&lt;p&gt;线程信号类：相当于通知，触发事件用的，&lt;code&gt;AutoResetEvent&lt;/code&gt; ，还有其他的类，个人觉得这个用着简单&lt;br&gt;
+数据集合类：无需锁，即可多线程同时访问&lt;code&gt;ConcurrentQueue，ConcurrentBag&lt;/code&gt;之类的&lt;/p&gt;
+
+&lt;p&gt;有个上面2种工具，我们就可以创造一些工人（线程），他们各自分工，互相通讯，工作起来有条不紊。
+请看下面的代码
+&lt;code&gt;csharp
+        private static void NewMethod5()
+        {
+            ConsoleColor defaultColor = Console.ForegroundColor;
+            ConcurrentQueue&amp;lt;int&amp;gt; q = new ConcurrentQueue&amp;lt;int&amp;gt;();//线程通讯用的队列
+            AutoResetEvent autoResetEvent = new AutoResetEvent(false);
+            Task waitingTask = Task.Factory.StartNew(() =&amp;gt;
+            {
+                //一个工人，负责接收消息，并写入文件
+                while (true)
+                {
+                    autoResetEvent.WaitOne();//休息一会儿，他们通知我，我再向下运行
+                    int res;
+                    while (q.TryDequeue(out  res))//只要队列（消息流水线）里有东西，我就不能停
+                    {
+                        if (res &amp;gt; 999)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                        }
+                        else Console.ForegroundColor = defaultColor;
+                        Console.WriteLine(&amp;quot;get {0}&amp;quot;, res);
+                        File.AppendAllText(@&amp;quot;d:\Log\test.log&amp;quot;, res.ToString());//只有一个线程向文件写内容，不需要再锁了
+                    }
+                }
+            });
+            for (int i = 0; i &amp;lt; 5; i++)
+            {
+                //5个工人，负责制作数据，并交给消息队列（相当于产品流水线）
+                Task.Factory.StartNew(() =&amp;gt;
+                {
+                    Random rnd = new Random();
+                    while (true)
+                    {
+                        int e = rnd.Next(500, 2000);//产生消息
+                        q.Enqueue(e);//放入队列，产品发到流水线上
+                        autoResetEvent.Set();//通知写日志的那个家伙，干活啦
+                        Thread.Sleep(rnd.Next(100) + 2);//休息一会儿
+                    }
+                });
+            }
+            try
+            {
+                Task.WaitAll(waitingTask);//我是老板，我在看着他们干活
+            }
+            catch (AggregateException ex)
+            {
+                ex.Flatten().Handle((inner) =&amp;gt;
+                {
+                    Console.WriteLine(&amp;quot;Exception is {0}&amp;quot;, inner.Message);
+                    return true;
+                });
+            }
+            Console.WriteLine(&amp;quot;Press enter to finish&amp;quot;);
+            Console.ReadLine();
+        }
+&lt;/code&gt;&lt;/p&gt;
+</description>
+        <pubDate>Wed, 28 May 2014 06:53:41 -0700</pubDate>
+        <link>http://lbp.im/blog/blog/2014/05/28/c%E5%B9%B6%E8%A1%8C%E7%BC%96%E7%A8%8B%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E9%97%B4%E9%80%9A%E8%BF%87%E9%98%9F%E5%88%97%E8%BF%9B%E8%A1%8C%E9%80%9A%E8%AE%AF/</link>
+        <guid isPermaLink="true">http://lbp.im/blog/blog/2014/05/28/c%E5%B9%B6%E8%A1%8C%E7%BC%96%E7%A8%8B%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E9%97%B4%E9%80%9A%E8%BF%87%E9%98%9F%E5%88%97%E8%BF%9B%E8%A1%8C%E9%80%9A%E8%AE%AF/</guid>
+        
+        
+      </item>
+    
+  </channel>
+</rss>

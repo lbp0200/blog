@@ -1,0 +1,285 @@
+<h3 id="section">演示</h3>
+<p><a href="http://be.lbp.im:8080/">http://be.lbp.im:8080/</a><br />
+###安装步骤
+1.开源地址<a href="http://blogengine.codeplex.com/">http://blogengine.codeplex.com/</a>使用2.8版本,不用2.9<br />
+2.Ubuntu安装<code>apt-get xsp4</code><br />
+3.执行网站目录下/setup/mono/setup.sh脚本<br />
+4.重命名网站Bin目录下的Microsoft.Web.Infrastructure.dll.bak(适用任何Mono程序)<br />
+&gt;NOTE: Do NOT copy the Microsoft.Web.Infrastructure assembly.  This assembly has been rebuilt in the mono library and will already be available to your app. 
+&gt;<a href="http://www.integratedwebsystems.com/2011/06/get-mvc3-razor-running-on-mono/">参考来源</a>  </p>
+
+<p>5.运行方式Nginx+FastCGI<br />
+<code>fastcgi-mono-server4 /socket=tcp:127.0.0.1:9000 /applications=be.lbp.im:/:/opt/BlogEngine.NET/ /multiplex=True</code><br />
+这种方式总报错，但是可以支持大并发。<br />
+另一种无错运行，适合小网站，网站目录下执行<br />
+<code>xsp4 &amp;</code><br />
+6.默认使用XML保存数据,账号密码admin:admin,初始化,进入建新的管理员,删除admin.
+7.（可选）转为SqlIte,使用Mono.Data.Sqlite.dll,先安装sqlite3,
+<code>sudo apt-get install sqlite3</code><br />
+8.复制setup/SQLite/BlogEngine.s3db到App_Data下面<br />
+9.备份Web.Config,使用下面的配置文件<br />
+注意:Mono.Data.Sqlite和System.Data.SQLite,这里区分大小写,我在这儿折腾了好久.<br />
+下面是配置文件重点修改的地方，也可以直接复制分割线下面的配置文件<br />
+```</p>
+<system.data>
+    <dbproviderfactories>
+      <!-- <remove invariant="System.Data.SQLite"/>
+      <add name="SQLite Data Provider" invariant="System.Data.SQLite" description=".Net Framework Data Provider for SQLite" type="System.Data.SQLite.SQLiteFactory, System.Data.SQLite"/> -->
+      <remove invariant="Mono.Data.Sqlite" />
+      <add name="SQLite Data Provider" invariant="Mono.Data.Sqlite" description=".Net Framework Data Provider for SQLite" type="Mono.Data.SQLite.SqliteFactory, Mono.Data.Sqlite" />
+	  </dbproviderfactories>
+	  </system.data>
+<pre><code> &lt;compilation debug="true" targetFramework="4.0"&gt;
+  &lt;assemblies&gt;
+    &lt;add assembly="Mono.Data.Sqlite, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756" /&gt;
+  &lt;/assemblies&gt; ```
+</code></pre>
+
+<p>```
+<?xml version="1.0"?></p>
+<configuration>
+  <configsections>
+    <sectiongroup name="BlogEngine">
+          <section name="blogProvider" requirepermission="false" type="BlogEngine.Core.Providers.BlogProviderSection, BlogEngine.Core" allowdefinition="MachineToApplication" restartonexternalchanges="true" />
+            <section name="blogFileSystemProvider" requirepermission="false" type="BlogEngine.Core.Providers.BlogFileSystemProviderSection, BlogEngine.Core" allowdefinition="MachineToApplication" restartonexternalchanges="true" />
+          </sectiongroup>
+      </configsections>
+    <blogengine>
+      <blogprovider defaultprovider="DbBlogProvider" filestoreprovider="XmlBlogProvider">
+          <providers>
+              <add description="Xml Blog Provider" name="XmlBlogProvider" type="BlogEngine.Core.Providers.XmlBlogProvider, BlogEngine.Core" />
+                <add connectionstringname="BlogEngine" description="Sql Database Provider" name="DbBlogProvider" type="BlogEngine.Core.Providers.DbBlogProvider, BlogEngine.Core" />
+              </providers>
+          </blogprovider>
+        <blogfilesystemprovider defaultprovider="XmlBlogProvider">
+          <providers>
+              <add description="Xml Blog Provider" name="XmlBlogProvider" type="BlogEngine.Core.Providers.XmlFileSystemProvider, BlogEngine.Core" />
+                <add storagevariable="BlogEngine" description="Sql Database Provider" name="DbBlogProvider" type="BlogEngine.Core.Providers.DbFileSystemProvider, BlogEngine.Core" />
+                <!--<add storageVariable="\\UNCPath\BlogFiles" description="UNC Path Provider" name="UNCBlogProvider" type="BlogEngine.Core.Providers.UNCFileSystemProvider, BlogEngine.Core" />-->
+              </providers>
+          </blogfilesystemprovider>
+      </blogengine>
+    <connectionstrings>
+      <clear />
+        <add name="BlogEngine" connectionstring="Data Source=|DataDirectory|/BlogEngine.s3db;Version=3;BinaryGUID=False;" providername="Mono.Data.SQLite" />
+      </connectionstrings>
+    <appsettings>
+      <add key="BlogEngine.FileExtension" value=".aspx" />
+        <!-- You can e.g. use "~/blog/" if BlogEngine.NET is not located in the root of the application -->
+        <add key="BlogEngine.VirtualPath" value="~/" />
+        <!-- The regex used to identify mobile devices so a different theme can be shown -->
+        <add key="BlogEngine.MobileDevices" value="(iemobile|iphone|ipod|android|nokia|sonyericsson|blackberry|samsung|sec\-|windows ce|motorola|mot\-|up.b|midp\-)" />
+        <!-- The name of the role with administrator permissions -->
+        <add key="BlogEngine.AdminRole" value="Administrators" />
+        <!-- The name of the role for anonymous(non-authenticated) users. -->
+        <add key="BlogEngine.AnonymousRole" value="Anonymous" />
+        <!-- The name of the role for Editors -->
+        <add key="BlogEngine.EditorsRole" value="Editors" />
+        <!--This value is to provide an alternative location for storing data.-->
+        <add key="StorageLocation" value="~/App_Data/" />
+        <!--This value is the folder name under the StorageLocation that data for blog instances will be stored in.-->
+        <add key="BlogInstancesFolderName" value="blogs" />
+        <!--A comma separated list of script names to hard minify. It's case-sensitive. -->
+        <add key="BlogEngine.HardMinify" value="blog.js,widget.js,WebResource.axd" />
+        <!--Any data grid in the admin panel should use this value for default number of items per page.-->
+        <add key="BlogEngine.GenericPageSize" value="20" />
+      </appsettings>
+    <system.servicemodel>
+      <services>
+          <service behaviorconfiguration="AuthenticationServiceBehaviors" name="System.Web.ApplicationServices.AuthenticationService">
+              <endpoint binding="basicHttpBinding" contract="System.Web.ApplicationServices.AuthenticationService" />
+              </service>
+          </services>
+        <servicehostingenvironment aspnetcompatibilityenabled="true" />
+        <behaviors>
+          <servicebehaviors>
+              <behavior name="AuthenticationServiceBehaviors">
+                  <servicemetadata httpgetenabled="true" />
+                  </behavior>
+              </servicebehaviors>
+          </behaviors>
+      </system.servicemodel>
+    <system.web.extensions>
+      <scripting>
+          <webservices>
+              <authenticationservice enabled="true" requiressl="false" />
+              </webservices>
+          </scripting>
+      </system.web.extensions>
+    <system.data>
+      <dbproviderfactories>
+          <!-- <remove invariant="System.Data.SQLite"/>
+            <add name="SQLite Data Provider" invariant="System.Data.SQLite" description=".Net Framework Data Provider for SQLite" type="System.Data.SQLite.SQLiteFactory, System.Data.SQLite"/> -->
+            <remove invariant="Mono.Data.Sqlite" />
+            <add name="SQLite Data Provider" invariant="Mono.Data.Sqlite" description=".Net Framework Data Provider for SQLite" type="Mono.Data.SQLite.SqliteFactory, Mono.Data.Sqlite" />
+          </dbproviderfactories>
+      </system.data>  
+    <system.web>
+      <webservices>
+          <protocols>
+              <add name="HttpPost" />
+                <add name="HttpGet" />
+              </protocols>
+          </webservices>
+        <compilation debug="true" targetframework="4.0">
+          <assemblies>
+              <add assembly="System.Management, Version=4.0.0.0, Culture=neutral, PublicKeyToken=B03F5F7F11D50A3A" />
+                <add assembly="System.Configuration, Version=4.0.0.0, Culture=neutral, PublicKeyToken=B03F5F7F11D50A3A" />
+                <add assembly="System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=B77A5C561934E089" />
+                <add assembly="System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=B77A5C561934E089" />
+                <add assembly="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=B03F5F7F11D50A3A" />
+                <add assembly="System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=B03F5F7F11D50A3A" />
+                <add assembly="System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=B77A5C561934E089" />
+                <add assembly="System.Web.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35" />
+                <add assembly="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35" />
+                <add assembly="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35" />
+                <add assembly="System.Web.WebPages.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35" />
+                <add assembly="Mono.Data.Sqlite, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756" />
+              </assemblies>
+            <!-- you may need it if you have issuew with razor/ajax in admin cshtml pages
+            <buildProviders>
+              <add extension=".cshtml" type="System.Web.WebPages.Razor.RazorBuildProvider, System.Web.WebPages.Razor"/>
+              </buildProviders>
+            -->
+            <expressionbuilders>
+              <add expressionprefix="LinqLength" type="BlogEngine.Core.Compilation.LinqLengthExpressionBuilder, BlogEngine.Core" />
+                <add expressionprefix="Reflect" type="BlogEngine.Core.Compilation.ReflectExpressionBuilder, BlogEngine.Core" />
+                <add expressionprefix="Session" type="BlogEngine.Core.Compilation.SessionExpressionBuilder, BlogEngine.Core" />
+                <add expressionprefix="Server" type="BlogEngine.Core.Compilation.ServerVariableExpressionBuilder, BlogEngine.Core" />
+                <add expressionprefix="QueryString" type="BlogEngine.Core.Compilation.QueryStringExpressionBuilder, BlogEngine.Core" />
+                <add expressionprefix="Code" type="BlogEngine.Core.Compilation.CodeExpressionBuilder, BlogEngine.Core" />
+              </expressionbuilders>
+          </compilation>
+        <globalization requestencoding="utf-8" responseencoding="utf-8" culture="auto" uiculture="auto" />
+        <httpruntime enableversionheader="false" usefullyqualifiedredirecturl="true" maxrequestlength="16384" executiontimeout="3600" requestlengthdiskthreshold="16384" requestvalidationmode="2.0" />
+        <machinekey validationkey="D9F7287EFDE8DF4CAFF79011D5308643D8F62AE10CDF30DAB640B7399BF6C57B0269D60A23FBCCC736FC2487ED695512BA95044DE4C58DC02C2BA0C4A266454C" decryptionkey="BDAAF7E00B69BA47B37EEAC328929A06A6647D4C89FED3A7D5C52B12B23680F4" validation="SHA1" decryption="AES" />
+        <authentication mode="Forms">
+          <forms timeout="129600" name=".AUXBLOGENGINE" protection="All" slidingexpiration="true" loginurl="~/Account/login.aspx" cookieless="UseCookies" />
+          </authentication>
+        <pages enablesessionstate="false" enableviewstatemac="true" enableeventvalidation="true" controlrenderingcompatibilityversion="3.5" clientidmode="AutoID">
+          <controls>
+              <add namespace="App_Code.Controls" tagprefix="blog" />
+              </controls>
+          </pages>
+        <customerrors mode="RemoteOnly" defaultredirect="~/error.aspx" redirectmode="ResponseRewrite">
+          <error statuscode="404" redirect="~/error404.aspx" />
+          </customerrors>
+        <!--<trust level="Medium"/>-->
+        <membership defaultprovider="DbMembershipProvider">
+          <providers>
+              <clear />
+                <add name="XmlMembershipProvider" type="BlogEngine.Core.Providers.XmlMembershipProvider, BlogEngine.Core" description="XML membership provider" passwordformat="Hashed" />
+                <add name="SqlMembershipProvider" type="System.Web.Security.SqlMembershipProvider" connectionstringname="BlogEngine" applicationname="BlogEngine" />
+                <add name="DbMembershipProvider" type="BlogEngine.Core.Providers.DbMembershipProvider, BlogEngine.Core" passwordformat="Hashed" connectionstringname="BlogEngine" />
+              </providers>
+          </membership>
+        <rolemanager defaultprovider="DbRoleProvider" enabled="true" cacherolesincookie="false">
+          <providers>
+              <clear />
+                <add name="XmlRoleProvider" type="BlogEngine.Core.Providers.XmlRoleProvider, BlogEngine.Core" description="XML role provider" />
+                <add name="SqlRoleProvider" type="System.Web.Security.SqlRoleProvider" connectionstringname="BlogEngine" applicationname="BlogEngine" />
+                <add name="DbRoleProvider" type="BlogEngine.Core.Providers.DbRoleProvider, BlogEngine.Core" connectionstringname="BlogEngine" />
+              </providers>
+          </rolemanager>
+        <sitemap defaultprovider="PageSiteMap" enabled="true">
+          <providers>
+              <add name="PageSiteMap" description="The site map provider that reads in the .sitemap XML files." type="BlogEngine.Core.Web.Controls.PageSiteMap, BlogEngine.Core" />
+                <add name="SecuritySiteMap" description="Used for authenticated users." type="BlogEngine.Core.SecuritySiteMapProvider, BlogEngine.Core" securitytrimmingenabled="true" sitemapfile="Web.sitemap" />
+              </providers>
+          </sitemap>
+        <httpmodules>
+          <add name="WwwSubDomainModule" type="BlogEngine.Core.Web.HttpModules.WwwSubDomainModule, BlogEngine.Core" />
+            <add name="UrlRewrite" type="BlogEngine.Core.Web.HttpModules.UrlRewrite, BlogEngine.Core" />
+            <add name="CompressionModule" type="BlogEngine.Core.Web.HttpModules.CompressionModule, BlogEngine.Core" />
+            <add name="ReferrerModule" type="BlogEngine.Core.Web.HttpModules.ReferrerModule, BlogEngine.Core" />
+            <add name="SecurityModule" type="BlogEngine.Core.Security, BlogEngine.Core" />
+            <add name="RightModule" type="BlogEngine.Core.Right, BlogEngine.Core" />
+            <!--Remove the default ASP.NET modules we don't need-->
+            <remove name="PassportAuthentication" />
+            <remove name="Profile" />
+            <remove name="AnonymousIdentification" />
+          </httpmodules>
+        <httphandlers>
+          <add verb="*" path="file.axd" type="BlogEngine.Core.Web.HttpHandlers.FileHandler, BlogEngine.Core" validate="false" />
+            <add verb="*" path="image.axd" type="BlogEngine.Core.Web.HttpHandlers.ImageHandler, BlogEngine.Core" validate="false" />
+            <add verb="*" path="syndication.axd" type="BlogEngine.Core.Web.HttpHandlers.SyndicationHandler, BlogEngine.Core" validate="false" />
+            <add verb="*" path="sitemap.axd" type="BlogEngine.Core.Web.HttpHandlers.SiteMap, BlogEngine.Core" validate="false" />
+            <add verb="*" path="trackback.axd" type="BlogEngine.Core.Web.HttpHandlers.TrackbackHandler, BlogEngine.Core" validate="false" />
+            <add verb="*" path="pingback.axd" type="BlogEngine.Core.Web.HttpHandlers.PingbackHandler, BlogEngine.Core" validate="false" />
+            <add verb="*" path="opensearch.axd" type="BlogEngine.Core.Web.HttpHandlers.OpenSearchHandler, BlogEngine.Core" validate="false" />
+            <add verb="*" path="metaweblog.axd" type="BlogEngine.Core.API.MetaWeblog.MetaWeblogHandler, BlogEngine.Core" validate="false" />
+            <add verb="*" path="rsd.axd" type="BlogEngine.Core.Web.HttpHandlers.RsdHandler, BlogEngine.Core" validate="false" />
+            <!--<add verb="*" path="css.axd" type="BlogEngine.Core.Web.HttpHandlers.CssHandler, BlogEngine.Core" validate="false"/>-->
+            <add verb="*" path="*.js.axd" type="BlogEngine.Core.Web.HttpHandlers.JavaScriptHandler, BlogEngine.Core" validate="false" />
+            <add verb="*" path="*.res.axd" type="BlogEngine.Core.Web.HttpHandlers.ResourceHandler, BlogEngine.Core" validate="false" />
+            <add verb="*" path="rating.axd" type="BlogEngine.Core.Web.HttpHandlers.RatingHandler, BlogEngine.Core" validate="false" />
+            <add verb="*" path="opml.axd" type="BlogEngine.Core.Web.HttpHandlers.OpmlHandler, BlogEngine.Core" validate="false" />
+            <add verb="*" path="blogml.axd" type="BlogEngine.Core.Web.HttpHandlers.BlogMLExportHandler, BlogEngine.Core" validate="false" />
+            <add verb="*" path="sioc.axd" type="BlogEngine.Core.Web.HttpHandlers.Sioc, BlogEngine.Core" validate="false" />
+            <add verb="*" path="apml.axd" type="BlogEngine.Core.Web.HttpHandlers.Apml, BlogEngine.Core" validate="false" />
+            <add verb="*" path="foaf*.axd" type="BlogEngine.Core.Web.HttpHandlers.Foaf, BlogEngine.Core" validate="false" />
+            <add verb="*" path="*.htm" type="System.Web.StaticFileHandler" />
+          </httphandlers>
+      </system.web>
+    <system.webserver>
+      <validation validateintegratedmodeconfiguration="false" />
+        <!-- Enable the staticContent section below to add Expires headers to images for better performance.
+             Some hosting providers does not allow the staticContent section to be set. -->
+             <!--
+        <staticContent>
+          <clientCache httpExpires="Sun, 29 Mar 2020 00:00:00 GMT" cacheControlMode="UseExpires" />
+            <mimeMap fileExtension=".mp4" mimeType="video/mp4" />
+          </staticContent>
+        -->
+        <modules runallmanagedmodulesforallrequests="true">
+          <add name="WwwSubDomainModule" type="BlogEngine.Core.Web.HttpModules.WwwSubDomainModule, BlogEngine.Core" />
+            <add name="UrlRewrite" type="BlogEngine.Core.Web.HttpModules.UrlRewrite, BlogEngine.Core" />
+            <add name="CompressionModule" type="BlogEngine.Core.Web.HttpModules.CompressionModule, BlogEngine.Core" />
+            <add name="ReferrerModule" type="BlogEngine.Core.Web.HttpModules.ReferrerModule, BlogEngine.Core" />
+            <add name="SecurityModule" type="BlogEngine.Core.Security, BlogEngine.Core" />
+            <add name="RightModule" type="BlogEngine.Core.Right, BlogEngine.Core" />
+          </modules>
+        <handlers accesspolicy="Read, Write, Script, Execute">
+          <add name="FileHandler" verb="*" path="file.axd" type="BlogEngine.Core.Web.HttpHandlers.FileHandler, BlogEngine.Core" resourcetype="Unspecified" requireaccess="Script" precondition="integratedMode" />
+            <add name="ImageHandler" verb="*" path="image.axd" type="BlogEngine.Core.Web.HttpHandlers.ImageHandler, BlogEngine.Core" resourcetype="Unspecified" requireaccess="Script" precondition="integratedMode" />
+            <add name="Syndication" verb="*" path="syndication.axd" type="BlogEngine.Core.Web.HttpHandlers.SyndicationHandler, BlogEngine.Core" resourcetype="Unspecified" requireaccess="Script" precondition="integratedMode" />
+            <add name="Sitemap" verb="*" path="sitemap.axd" type="BlogEngine.Core.Web.HttpHandlers.SiteMap, BlogEngine.Core" resourcetype="Unspecified" requireaccess="Script" precondition="integratedMode" />
+            <add name="Trackback" verb="*" path="trackback.axd" type="BlogEngine.Core.Web.HttpHandlers.TrackbackHandler, BlogEngine.Core" resourcetype="Unspecified" requireaccess="Script" precondition="integratedMode" />
+            <add name="Pingback" verb="*" path="pingback.axd" type="BlogEngine.Core.Web.HttpHandlers.PingbackHandler, BlogEngine.Core" resourcetype="Unspecified" requireaccess="Script" precondition="integratedMode" />
+            <add name="OpenSearch" verb="*" path="opensearch.axd" type="BlogEngine.Core.Web.HttpHandlers.OpenSearchHandler, BlogEngine.Core" resourcetype="Unspecified" requireaccess="Script" precondition="integratedMode" />
+            <add name="MetaWeblog" verb="*" path="metaweblog.axd" type="BlogEngine.Core.API.MetaWeblog.MetaWeblogHandler, BlogEngine.Core" resourcetype="Unspecified" requireaccess="Script" precondition="integratedMode" />
+            <add name="RSD" verb="*" path="rsd.axd" type="BlogEngine.Core.Web.HttpHandlers.RsdHandler, BlogEngine.Core" resourcetype="Unspecified" requireaccess="Script" precondition="integratedMode" />
+            <!--<add name="CssHandler" verb="*" path="css.axd" type="BlogEngine.Core.Web.HttpHandlers.CssHandler, BlogEngine.Core" resourceType="Unspecified" requireAccess="Script" preCondition="integratedMode"/>-->
+            <add name="WebResource" path="*.js.axd" verb="*" type="BlogEngine.Core.Web.HttpHandlers.JavaScriptHandler, BlogEngine.Core" resourcetype="Unspecified" requireaccess="Script" precondition="integratedMode" />
+            <add name="Resource" verb="*" path="*.res.axd" type="BlogEngine.Core.Web.HttpHandlers.ResourceHandler, BlogEngine.Core" resourcetype="Unspecified" requireaccess="Script" precondition="integratedMode" />
+            <add name="Rating" verb="*" path="rating.axd" type="BlogEngine.Core.Web.HttpHandlers.RatingHandler, BlogEngine.Core" resourcetype="Unspecified" requireaccess="Script" precondition="integratedMode" />
+            <add name="Opml" verb="*" path="opml.axd" type="BlogEngine.Core.Web.HttpHandlers.OpmlHandler, BlogEngine.Core" resourcetype="Unspecified" requireaccess="Script" precondition="integratedMode" />
+            <add name="BlogML" verb="*" path="blogml.axd" type="BlogEngine.Core.Web.HttpHandlers.BlogMLExportHandler, BlogEngine.Core" resourcetype="Unspecified" requireaccess="Script" precondition="integratedMode" />
+            <add name="SIOC" verb="*" path="sioc.axd" type="BlogEngine.Core.Web.HttpHandlers.Sioc, BlogEngine.Core" resourcetype="Unspecified" requireaccess="Script" precondition="integratedMode" />
+            <add name="Apml" verb="*" path="apml.axd" type="BlogEngine.Core.Web.HttpHandlers.Apml, BlogEngine.Core" resourcetype="Unspecified" requireaccess="Script" precondition="integratedMode" />
+            <add name="Foaf" verb="*" path="foaf*.axd" type="BlogEngine.Core.Web.HttpHandlers.Foaf, BlogEngine.Core" resourcetype="Unspecified" requireaccess="Script" precondition="integratedMode" />
+            <add name="Html" path="*.htm" verb="*" type="System.Web.StaticFileHandler" resourcetype="Unspecified" precondition="integratedMode" />
+            <add name="ScriptHandlerFactory" verb="*" path="*.asmx" precondition="integratedMode" type="System.Web.Script.Services.ScriptHandlerFactory, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35" />
+            <add name="ScriptHandlerFactoryAppServices" verb="*" path="*_AppService.axd" precondition="integratedMode" type="System.Web.Script.Services.ScriptHandlerFactory, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35" />
+          </handlers>
+        <!-- Enable the httpProtocol section below to manipulate some HTTP headers.
+             Some hosting providers does not allow the httpProtocol section to be set. -->
+             <!--
+        <httpProtocol>
+          <customHeaders>
+              <remove name="X-Powered-By" />
+                <add name="Etag" value=" " />
+              </customHeaders>
+          </httpProtocol>
+        -->
+        <!-- enables compression in IIS 7
+        <urlCompression doDynamicCompression="true" doStaticCompression="true" dynamicCompressionBeforeCache="true"/>
+        -->
+        <staticcontent>
+            <clientcache cachecontrolmode="UseMaxAge" cachecontrolmaxage="365.00:00:00" cachecontrolcustom="public" />
+                <remove fileextension=".ico" />
+                <mimemap fileextension=".ico" mimetype="image/x-icon" />
+            </staticcontent>
+      </system.webserver>
+      </configuration>
+<p>```</p>

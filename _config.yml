@@ -1,12 +1,16 @@
 # Site settings
-title: 丑矬穷
+title: 丑矬穷——不做码农做极客
 email: lbp0408@gmail.com
 description: "又一个github-jekyll博客"
 baseurl: "/blog"
-url: "http://lbp0200.github.io"
+url: "http://lbp.im/blog"
 twitter_username: 
 github_username:  lbp0200
 
+paginate: 10
 # Build settings
 markdown: redcarpet
 permalink: pretty
+
+gems:
+          - jekyll-sitemap
